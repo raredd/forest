@@ -1,0 +1,17 @@
+Package: forest
+Type: Package
+Title: Forest plots
+Version: 0.0.0.9000
+Authors@R: person("Robert", "Redd", email = "raredd01@gmail.com",
+  role = c("aut", "cre"))
+Author: Robert Redd
+Maintainer: Robert Redd <raredd01@gmail.com>
+Description: Forest plots.
+Suggests:
+    testthat
+License: GPL-2
+LazyData: yes
+URL: https://github.com/raredd/forest
+Roxygen: list(wrap = FALSE)
+VignetteBuilder: knitr
+RoxygenNote: 6.0.1
