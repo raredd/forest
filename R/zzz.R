@@ -12,5 +12,5 @@
                           "run devtools::install_github('raredd/rawr')",
                           domain = NA)
   
-  invisible()
+  invisible(NULL)
 }

@@ -3,7 +3,10 @@
 ###
 
 
-`%||%` <- function(a, b) if (!is.null(a)) a else b
+`%||%` <- function(x, y) {
+  if (!is.null(x))
+    x else y
+}
 
 `%inside%` <- function(x, interval) {
   interval <- sort(interval)
@@ -23,6 +26,7 @@ assert_class <- function(x, class, which = FALSE,
   
   if (!all(inherits(x, class, which)))
     FUN(message)
+  
   invisible(TRUE)
 }
 
@@ -111,8 +115,10 @@ roundr <- function(x, digits = 1L) {
     is.numeric(x) || is.complex(x) || is.na(x), logical(1L))
   if (!all(mode.ok))
     stop('non-numeric argument to mathematical function')
+  
   res <- sprintf(paste0('%.', digits = digits, 'f'), x)
   zzz <- paste0('0.', paste(rep('0', digits), collapse = ''))
   res[res == paste0('-', zzz)] <- zzz
+  
   setNames(res, names(x))
 }
