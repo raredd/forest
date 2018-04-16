@@ -7,18 +7,20 @@
 
 
 #' @export
-add_reference <- function(x) {
+add_reference <- function(x, header = FALSE) {
   assert_class(x, 'cleanfp')
   mf   <- x$model.frame %||% model.frame(x[[2L]])
   nums <- lapply(mf, get_n)
   vars <- colnames(mf)[-1L]
+  lbls <- if (is.logical(header))
+    NULL else header
   
   ## add suffixes for ordered factors to merge
   ord  <- sapply(mf, is.ordered)
   suf  <- c('', '.L', '.Q', '.C',
             sprintf('^%s', seq.int(pmax(4L, nrow(mf)))))
   
-  nn   <- lapply(seq_along(nums)[-1L], function(x)
+  nn <- lapply(seq_along(nums)[-1L], function(x)
     paste0(names(nums)[x],
            if (ord[x])
              suf[seq.int(length(nums[[x]]) - 0L)]
@@ -29,13 +31,32 @@ add_reference <- function(x) {
   mm <- matrix(NA, length(rn), 0L, dimnames = list(rn))
   dd <- merge(mm, x[[1L]], by = 0, all = TRUE)
   dd <- dd[match(rownames(mm), dd[, 1L]), ]
-  
-  ## extra data with numeric values
-  dd_n <- dd[, -c(1L, ncol(dd))]
-  dd_n[] <- lapply(dd_n, as.numeric)
+  dd$group <- rep(seq_along(nn), lengths(nn))
+  if (identical(header, FALSE))
+    dd[, 1L] <- paste0('  ', rn)
   
   dd[, 2L][is.na(dd[, 2L])] <- 'Reference'
   dd[, ncol(dd)][is.na(dd[, ncol(dd)])] <- '-'
+  
+  if (!identical(header, FALSE)) {
+    nums[] <- Map(c, NA, nums)
+    mn <- Map(c, lbls %||% sprintf('header-%s', names(nums)[-1L]), nn)
+    rn <- unlist(mn)
+    mm <- matrix(NA, length(rn), 0L, dimnames = list(rn))
+    dd <- merge(mm, dd, by.x = 0, by.y = 'Row.names', all = TRUE)
+    dd <- dd[match(rownames(mm), dd[, 1L]), ]
+    dd$group <- rep(seq_along(mn), lengths(mn))
+    rn <- Map(c, lbls %||% sprintf('header-%s', names(nums)[-1L]),
+              sapply(nn, function(x) paste0('  ', x)))
+    dd[, 1L] <- unlist(rn)
+  }
+  
+  ## extra data with numeric values
+  dd_n <- dd[, -c(1L, ncol(dd))]
+  suppressWarnings({
+    dd_n[] <- lapply(dd_n, as.numeric)
+  })
+  
   dd$N <- unlist(nums[-1L])
   
   rownames(dd) <- rownames(dd_n) <- NULL

@@ -5,18 +5,21 @@
 \alias{plot.forest}
 \title{Forest plot}
 \usage{
-forest(x, ..., plotArgs = list(), plot = TRUE)
+forest(x, ..., header = FALSE, plotArgs = list(), plot = TRUE)
 
 \method{plot}{forest}(x, panel_size = c(0.3, 0.45, 0.25), col.rows,
-  center_panel = NULL, type = c("ci", "box", "tplot"), show_conf = FALSE,
-  labels = NULL, xlim = NULL, axes = TRUE, logx = FALSE,
-  inner.mar = c(0, 0, 0, 0), reset_par = TRUE, ...)
+  center_panel = NULL, header = FALSE, type = c("ci", "box", "tplot"),
+  show_conf = FALSE, labels = NULL, xlim = NULL, axes = TRUE,
+  logx = FALSE, inner.mar = c(0, 0, 0, 0), reset_par = TRUE, ...)
 }
 \arguments{
 \item{x}{an object returned by \code{\link{prepare_list}} or an object of
 a supported class}
 
 \item{...}{additional arguments passed on to other methods}
+
+\item{header}{logical or a vector of character strings used as labels for
+each variable in the model}
 
 \item{plot}{logical; if \code{TRUE}, a forest plot is generated; otherwise,
 a list of data to plot is returned (see \code{plot.forest})}

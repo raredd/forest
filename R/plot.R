@@ -14,6 +14,8 @@
 #' 
 #' @param x an object returned by \code{\link{prepare_list}} or an object of
 #' a supported class
+#' @param header logical or a vector of character strings used as labels for
+#' each variable in the model
 #' @param ... additional arguments passed on to other methods
 #' @param plot logical; if \code{TRUE}, a forest plot is generated; otherwise,
 #' a list of data to plot is returned (see \code{plot.forest})
@@ -121,9 +123,9 @@
 #' 
 #' @export
 
-forest <- function(x, ..., plotArgs = list(), plot = TRUE) {
+forest <- function(x, ..., header = FALSE, plotArgs = list(), plot = TRUE) {
   x <- cleanfp(x, ...)
-  x <- add_reference(x)
+  x <- add_reference(x, header)
   x <- prepare_forest(x)
   
   if (plot)
@@ -135,7 +137,7 @@ forest <- function(x, ..., plotArgs = list(), plot = TRUE) {
 #' @rdname forest
 #' @export
 plot.forest <- function(x, panel_size = c(.3, .45, .25),
-                        col.rows, center_panel = NULL,
+                        col.rows, center_panel = NULL, header = FALSE,
                         type = c('ci', 'box', 'tplot'),
                         show_conf = FALSE, labels = NULL,
                         xlim = NULL, axes = TRUE, logx = FALSE,
@@ -146,17 +148,19 @@ plot.forest <- function(x, panel_size = c(.3, .45, .25),
   
   if (inherits(x, c('coxph', ''))) {
     x <- cleanfp(x)
-    x <- add_ref(x)
-    x <- prepare_list(x)
+    x <- add_reference(x, header)
+    x <- prepare_forest(x)
   }
-  assert_class(x, 'cleanfp_list')
   
+  assert_class(x, 'cleanfp_list')
+  ox <- x
   nn <- data.frame(x$numeric)
+  
   if (is.null(x$cleanfp_list)) {
     nn <- x$numeric
-    x <- x
+    x  <- x
   } else {
-    x <- x[[1L]]
+    x  <- x[[1L]]
     nn <- x$numeric
   }
   nr <- nrow(nn)
@@ -192,11 +196,13 @@ plot.forest <- function(x, panel_size = c(.3, .45, .25),
   
   ## base plot
   # plot.null(lx)
-  col.rows <- if (missing(col.rows))
-    c(grey(.95), NA) else {
-      col.rows[col.rows %in% 'none'] <- NA
-      col.rows
-    }
+  col.rows <- if (missing(col.rows)) {
+    grp <- as.integer(ox$cleanfp_ref[[1L]]$group)
+    rep(c(grey(.95), NA), length(grp))[grp]
+  } else {
+    col.rows[col.rows %in% 'none'] <- NA
+    col.rows
+  }
   bars(lx, col.rows, TRUE, TRUE)
   
   
