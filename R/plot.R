@@ -16,7 +16,7 @@
 #' a supported class
 #' @param header logical or a vector of character strings used as labels for
 #' each variable in the model
-#' @param ... additional arguments passed on to other methods
+#' @param ... additional arguments passed to other methods
 #' @param plot logical; if \code{TRUE}, a forest plot is generated; otherwise,
 #' a list of data to plot is returned (see \code{plot.forest})
 #' @param panel_size proportional size of \code{c(left, middle, right)} panels
@@ -165,8 +165,17 @@ plot.forest <- function(x, panel_size = c(.3, .45, .25),
   }
   nr <- nrow(nn)
   
-  if (!is.null(labels))
-    x[[1L]] <- make.unique(rep_len(labels, nr))
+  if (!is.null(labels)) {
+    ii <- if (length(ii <- grep('^  ', x[[1L]]))) {
+      labels <- paste0('  ', labels)
+      ii
+    } else {
+      labels <- as.character(labels)
+      
+      seq.int(nr)
+    }
+    x[[1L]][ii] <- make.unique(rep_len(labels, nr))[seq_along(ii)]
+  }
   
   type <- match.arg(type)
   panel_fn <- switch(
@@ -188,7 +197,7 @@ plot.forest <- function(x, panel_size = c(.3, .45, .25),
   xcf <- cumsum(panel_size)[-length(panel_size)]
   
   plot.new()
-  par(...)
+  # par(...)
   plot.window(1:2, range(lx))
   # m <- matrix(c(1,1,1,2,3,4,5,5,5), 3L, byrow = TRUE)
   # layout(m, heights = c(1, 10, 1))
@@ -223,8 +232,11 @@ plot.forest <- function(x, panel_size = c(.3, .45, .25),
   ## right panel
   rp <- x[c(4:3,3)]
   if (show_conf) {
-    rp[[1L]] <- ifelse(grepl('Reference', rp[[1L]]), rp[[1L]],
-                       sprintf('%s (%s, %s)', rp[[1L]], x[[5]][[2L]], x[[5]][[3L]]))
+    rp[[1L]] <- ifelse(
+      grepl('Reference', rp[[1L]]), rp[[1L]],
+      sprintf('%s (%s, %s)', rp[[1L]], x[[5]][[2L]], x[[5]][[3L]])
+    )
+    rp[[1L]] <- gsub('(NA.*){3}', '', rp[[1L]])
     names(rp)[1L] <- 'Estimate (LCI, UCI)'
   }
   par(fig = c(tail(xcf, -1), 1, 0, 1))

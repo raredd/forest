@@ -16,7 +16,7 @@ forest(x, ..., header = FALSE, plotArgs = list(), plot = TRUE)
 \item{x}{an object returned by \code{\link{prepare_list}} or an object of
 a supported class}
 
-\item{...}{additional arguments passed on to other methods}
+\item{...}{additional arguments passed to other methods}
 
 \item{header}{logical or a vector of character strings used as labels for
 each variable in the model}
