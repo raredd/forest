@@ -9,14 +9,38 @@
 * [design](#design)  
 * [examples](#examples)  
 
-```{r, message=FALSE}
-knitr::opts_chunk$set(fig.width=8, fig.height=6, message=FALSE, eval=FALSE)
-library('forest')
+```{r, include=FALSE}
+library('knitr')
+knitr::opts_chunk$set(
+  fig.width = 8, fig.height = 6, message = FALSE, eval = FALSE
+)
 ```
 
 ## intro
 
+```{r}
+library('forest')
+```
+
 ## design
+
+```{r}
+library('survival')
+lung2 <- within(lung, {
+  sex <- factor(sex, 1:2, c('Male', 'Female'))
+  ph.ecog <- factor(ph.ecog, 0:2)
+  ph.ecog2 <- factor(ph.ecog, 0:2, ordered = TRUE)
+})
+
+mod <- coxph(Surv(time, status) ~ age + sex + ph.ecog2, lung2)
+clean <- cleanfp(mod)
+clean_ref <- add_reference(clean, c('Age (years)', 'Sex',
+                                    'ECOG performance score'))
+# clean_ref <- add_reference(clean)
+prep_list <- prepare_forest(clean_ref)
+
+plot(prep_list)
+```
 
 ## examples
 
@@ -59,7 +83,6 @@ forest(mod, plotArgs = list(show_conf = TRUE, logx = TRUE))
 ```{r}
 mod <- mtcars
 mod[] <- lapply(mod, function(x) +grepl('1|4', x))
-forest(mpg ~ ., mod)
 forest(mpg ~ ., mod, plotArgs = list(xlim = c(0, 20), show_conf = TRUE))
 ```
 
@@ -78,7 +101,7 @@ forest(mod, ~ age + sex + abo, transplant)
 ```{r}
 library('cmprsk2')
 mod <- crr2(Surv(futime, event(censored) == death) ~ age + sex + abo, transplant)
-forest(mod)
+forest(mod, header = c('Age at dx', 'Blood type'))
 ```
 
 ### install
