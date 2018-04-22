@@ -22,7 +22,7 @@ add_reference <- function(x, header = FALSE) {
   
   nn <- lapply(seq_along(nums)[-1L], function(x)
     paste0(names(nums)[x],
-           if (ord[x])
+           if (ord[x] & grepl('poly', getOption('contrasts')[2L]))
              suf[seq.int(length(nums[[x]]) - 0L)]
            else names(nums[[x]]) %||% ''))
   rn <- unlist(nn)
