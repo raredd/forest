@@ -4,9 +4,10 @@
 \alias{panel_ci}
 \title{Panel CI}
 \usage{
-panel_ci(data, y = rev(seq.int(nrow(data))), col = 1L,
-  xlim = extendrange(unlist(data)), limits = xlim, logx = FALSE,
-  panel.first = NULL, panel.last = NULL, vline = 1, type, ...)
+panel_ci(data, y = rev(seq.int(nrow(data))), col = 1L, cex = NULL,
+  pch = NULL, xlim = extendrange(unlist(data)), limits = xlim,
+  logx = FALSE, panel.first = NULL, panel.last = NULL, vline = 1, type,
+  ...)
 }
 \arguments{
 \item{data}{a data frame or matrix with three columns containing the
@@ -14,7 +15,8 @@ point value, lower limit, and upper limit, respectively}
 
 \item{y}{y-coordinates where each row of \code{data} is plotted}
 
-\item{col}{color for each, recycled as needed}
+\item{col, cex, pch}{color, size, plotting character for each, recycled as
+needed}
 
 \item{xlim}{x-axis limits}
 

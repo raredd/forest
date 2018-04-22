@@ -71,7 +71,8 @@ panel_box <- function(data, y = seq.int(length(data)),
 #' @param data a data frame or matrix with three columns containing the
 #' point value, lower limit, and upper limit, respectively
 #' @param y y-coordinates where each row of \code{data} is plotted
-#' @param col color for each, recycled as needed
+#' @param col,cex,pch color, size, plotting character for each, recycled as
+#' needed
 #' @param xlim x-axis limits
 #' @param limits limits for intervals; values outside of \code{limits}
 #' will be truncated and drawn as an arrow
@@ -98,7 +99,8 @@ panel_box <- function(data, y = seq.int(length(data)),
 #' 
 #' @export
 
-panel_ci <- function(data, y = rev(seq.int(nrow(data))), col = 1L,
+panel_ci <- function(data, y = rev(seq.int(nrow(data))),
+                     col = 1L, cex = NULL, pch = NULL,
                      xlim = extendrange(unlist(data)), limits = xlim,
                      logx = FALSE, panel.first = NULL, panel.last = NULL,
                      vline = 1, type, ...) {
@@ -115,8 +117,8 @@ panel_ci <- function(data, y = rev(seq.int(nrow(data))), col = 1L,
          if (TRUE || type) { ## type
            data[, 1L][!data[, 1L] %inside% xlim |
                         !data[, 1L] %inside% limits] <- NA
-           points(data[, 1L], y, pch = 15L, col = col,
-                  cex = rescaler(
+           points(data[, 1L], y, pch = pch %||% 15L, col = col,
+                  cex = cex %||% rescaler(
                     ifelse(abs(data[, 1L]) < 1,
                            1 / abs(data[, 1L]), abs(data[, 1L])),
                     c(1, 5)
