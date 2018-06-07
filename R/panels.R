@@ -144,7 +144,8 @@ panel_ci <- function(data, y = rev(seq.int(nrow(data))),
            
            varrows <- Vectorize(arrows, c('code', 'angle'))
            for (ii in seq_along(y)) {
-             if (anyNA(data[ii, -1L]))
+             # if (anyNA(data[ii, -1L]))
+             if (is.na(data[ii, 2L]))
                next
              varrows(lo[ii], y[ii], hi[ii], y[ii], col = col[ii],
                      code = 1:2, length = 0.05, xpd = NA,
