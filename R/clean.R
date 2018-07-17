@@ -42,7 +42,7 @@ cleanfp.coxph <- function(x, exp = TRUE, conf.int = 0.95,
   
   if (!exp) {
     res[, -ncol(res), drop = FALSE] <- log(res[, -ncol(res)])
-    names(res)[1] <- 'coef'
+    names(res)[1L] <- 'coef'
   }
   
   res[] <- lapply(res, roundr, digits = digits)
@@ -68,13 +68,13 @@ cleanfp.crr <- function(x, formula, data, exp = TRUE, conf.int = 0.95,
            diff(as.numeric(gsub('%', '', colnames(ci)[3:4], fixed = TRUE))))
   
   res <- cbind(
-    data.frame(ci[, -2, drop = FALSE], check.names = FALSE),
+    data.frame(ci[, -2L, drop = FALSE], check.names = FALSE),
     p.value = co[, grep('^p\\-value', colnames(co))]
   )
   
   if (!exp) {
     res[, -ncol(res), drop = FALSE] <- log(res[, -ncol(res)])
-    names(res)[1] <- 'coef'
+    names(res)[1L] <- 'coef'
   }
   
   res[] <- lapply(res, roundr, digits = digits)
@@ -84,6 +84,8 @@ cleanfp.crr <- function(x, formula, data, exp = TRUE, conf.int = 0.95,
   
   ## need extra things for later objects
   mf <- model.frame(formula, data)
+  ## add padding column for add_reference
+  mf <- cbind(NA, mf)
   
   structure(
     list(cleanfp = res, object = x, model.frame = mf),
@@ -119,7 +121,7 @@ cleanfp.coxphf <- function(x, formula = x$call$formula, data,
   
   if (!exp) {
     res[, -ncol(res), drop = FALSE] <- log(res[, -ncol(res)])
-    names(res)[1] <- 'coef'
+    names(res)[1L] <- 'coef'
   }
   
   res[] <- lapply(res, roundr, digits = digits)
@@ -163,7 +165,7 @@ cleanfp.logistf <- function(x, exp = TRUE, conf.int = 1 - x$alpha,
   
   if (!exp) {
     res[, -ncol(res), drop = FALSE] <- log(res[, -ncol(res)])
-    names(res)[1] <- 'coef'
+    names(res)[1L] <- 'coef'
   }
   
   res[] <- lapply(res, roundr, digits = digits)
@@ -208,7 +210,7 @@ cleanfp.glm <- function(x, exp = TRUE, conf.int = 0.95,
   
   if (!exp) {
     res[, -ncol(res), drop = FALSE] <- log(res[, -ncol(res)])
-    names(res)[1] <- 'coef'
+    names(res)[1L] <- 'coef'
   }
   
   res[] <- lapply(res, roundr, digits = digits)
