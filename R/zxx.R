@@ -64,6 +64,11 @@ clist <- function (x, y, how = c('cbind', 'rbind')) {
   z
 }
 
+islist <- function(x) {
+  ## is.list(data.frame()); forest:::islist(data.frame())
+  inherits(x, 'list')
+}
+
 pvalr <- function(pvals, sig.limit = 0.001, digits = 3L,
          html = FALSE, show.p = FALSE) {
   ## rawr::pvalr

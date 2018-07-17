@@ -67,11 +67,10 @@
 #'      })
 #' 
 #' 
-#' fp <- forest(glm(vs ~ factor(gear) + wt + factor(am), mtcars,
+#' fp <- forest(glm(vs ~ factor(gear) + wt + hp, mtcars,
 #'                  family = 'binomial'),
 #'              plot = FALSE)
-#' plot(fp,
-#'   labels = c(paste('Gear -', 3:5), 'Weight (1000 lbs)', 'Automatic', 'Manual'))
+#' plot(fp, labels = c(paste('Gear -', 3:5), 'Weight (1k lbs)', 'Horse Power'))
 #' 
 #' 
 #' ## multiple models

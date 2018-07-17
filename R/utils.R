@@ -55,6 +55,8 @@ add_reference <- function(x, header = FALSE) {
   dd_n <- dd[, -c(1L, ncol(dd))]
   suppressWarnings({
     dd_n[] <- lapply(dd_n, as.numeric)
+    ## remove p-value formatting (eg, "< 0.01") -- or fix 
+    # dd_n[] <- lapply(dd_n, function(x) as.numeric(gsub('[< ]', '', x)))
   })
   
   dd$N <- unlist(nums[-1L])
