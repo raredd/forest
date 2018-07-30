@@ -174,7 +174,8 @@ cleanfp.logistf <- function(x, exp = TRUE, conf.int = 1 - x$alpha,
     res$p.value <- pvalr(ss$prob)
   
   structure(
-    list(cleanfp = res, object = x, model.frame = model.frame(x)),
+    list(cleanfp = res, object = x,
+         model.frame = model.frame(x$formula, x$data)),
     class = 'cleanfp'
   )
 }

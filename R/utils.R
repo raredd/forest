@@ -48,7 +48,8 @@ add_reference <- function(x, header = FALSE) {
     dd$group <- rep(seq_along(mn), lengths(mn))
     rn <- Map(c, lbls %||% sprintf('header-%s', names(nums)[-1L]),
               sapply(nn, function(x) paste0('  ', x)))
-    dd[, 1L] <- unlist(rn)
+    dd[, 1L] <- unique(unlist(rn))
+    # dd[, 1L] <- unlist(rn)
   }
   
   ## extra data with numeric values
