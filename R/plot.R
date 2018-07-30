@@ -51,6 +51,10 @@
 #' x <- forest(x)
 #' plot(x, show_conf = TRUE)
 #' 
+#' palette(c('grey70', 'green4'))
+#' plot(x, show_conf = TRUE, cex = 3)
+#' palette('default')
+#' 
 #' 
 #' ## equivalent ways to make forest plot
 #' x <- coxph(Surv(time, status) ~ age + sex + ph.ecog, lung2)
@@ -137,12 +141,12 @@ forest <- function(x, ..., header = FALSE, plotArgs = list(), plot = TRUE) {
 
 #' @rdname forest
 #' @export
-plot.forest <- function(x, panel_size = c(.3, .45, .25),
+plot.forest <- function(x, panel_size = c(0.3, 0.45, 0.25),
                         col.rows, center_panel = NULL, header = FALSE,
                         type = c('ci', 'box', 'tplot'),
                         show_conf = FALSE, labels = NULL,
                         xlim = NULL, axes = TRUE, logx = FALSE,
-                        inner.mar = c(0,0,0,0), reset_par = TRUE,
+                        inner.mar = c(0, 0, 0, 0), reset_par = TRUE,
                         layout = c('split', 'unified'), ...) {
   op <- par(no.readonly = TRUE)
   if (reset_par)
@@ -211,10 +215,7 @@ plot.forest <- function(x, panel_size = c(.3, .45, .25),
   col.rows <- if (missing(col.rows)) {
     grp <- as.integer(ox$cleanfp_ref[[1L]]$group)
     rep(c(grey(.95), NA), length(grp))[grp]
-  } else {
-    col.rows[col.rows %in% 'none'] <- NA
-    col.rows
-  }
+  } else replace(col.rows, col.rows %in% 'none', NA)
   bars(lx, col.rows, TRUE, TRUE)
   
   
@@ -258,7 +259,7 @@ plot.forest <- function(x, panel_size = c(.3, .45, .25),
   ) -> at
   vtext(unique(at$x), max(at$y) + c(1, 1, 1), names(rp),
         font = 2L, xpd = NA, adj = c(NA, NA, 1),
-        col = c('black', 'red', 'transparent'))
+        col = c(palette()[1:2], 'transparent'))
   
   
   ## center panel
