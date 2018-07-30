@@ -31,6 +31,8 @@
 #' @param reset_par logical; if \code{TRUE}, the graphical parameters are
 #' reset to their state before the function call; use \code{FALSE} to
 #' continue adding to the middle panel figure
+#' @param layout layout of figure, either \code{"split"} where plot splits
+#' the text columns or \code{"unified"} where the text columns are adjacent
 #' @param ... additional graphical parameters passed to \code{\link{par}}
 #' 
 #' @examples
@@ -140,10 +142,12 @@ plot.forest <- function(x, panel_size = c(.3, .45, .25),
                         type = c('ci', 'box', 'tplot'),
                         show_conf = FALSE, labels = NULL,
                         xlim = NULL, axes = TRUE, logx = FALSE,
-                        inner.mar = c(0,0,0,0), reset_par = TRUE, ...) {
+                        inner.mar = c(0,0,0,0), reset_par = TRUE,
+                        layout = c('split', 'unified'), ...) {
   op <- par(no.readonly = TRUE)
   if (reset_par)
     on.exit(par(op))
+  layout <- match.arg(layout)
   
   if (inherits(x, c('coxph', ''))) {
     x <- cleanfp(x)
@@ -216,7 +220,9 @@ plot.forest <- function(x, panel_size = c(.3, .45, .25),
   
   ## left panel
   lp <- x[1:2]
-  par(fig = c(0, xcf[1L], 0, 1))
+  if (layout == 'split')
+    par(fig = c(0, xcf[1L], 0, 1))
+  else par(fig = c(0, xcf[1L] * .9, 0, 1))
   # plot.null(lp)
   plot_text(lp, c(1, 2),
             col = vec('black', 'darkgrey', which_ref, nr),
@@ -238,7 +244,11 @@ plot.forest <- function(x, panel_size = c(.3, .45, .25),
     rp[[1L]] <- gsub('(NA.*){3}', '', rp[[1L]])
     names(rp)[1L] <- 'Estimate (LCI, UCI)'
   }
-  par(fig = c(tail(xcf, -1), 1, 0, 1))
+  if (layout == 'split')
+    par(fig = c(tail(xcf, -1L), 1, 0, 1))
+  else par(fig = c(xcf[1L] * 1.1, xcf[1L] * 1.75, 0, 1))
+  
+  
   # plot.null(rp)
   plot_text(rp, c(1, 2.5),
             col = c(vec('black', 'darkgrey', which_ref, nr),
@@ -261,11 +271,18 @@ plot.forest <- function(x, panel_size = c(.3, .45, .25),
     1 else 0
   # xlim[1L] <- 0 + pmin(0.1, min(unlist(nn), na.rm = TRUE) * logx)
   
-  par(
-    fig = c(xcf[1L], xcf[2L], 0, 1), new = TRUE, xaxs = 'i',
-    mar = pmin(par('mar'), c(NA, 1, NA, NA), na.rm = TRUE) +
-      inner.mar + c(0, 0, 0, 1)
-  )
+  if (layout == 'split')
+    par(
+      fig = c(xcf[1L], xcf[2L], 0, 1), new = TRUE, xaxs = 'i',
+      mar = pmin(par('mar'), c(NA, 1, NA, NA), na.rm = TRUE) +
+        inner.mar + c(0, 0, 0, 1)
+    )
+  else
+    par(
+      fig = c(xcf[1L] * 1.5, 1, 0, 1), new = TRUE, xaxs = 'i',
+      mar = pmin(par('mar'), c(NA, NA, NA, NA), na.rm = TRUE) +
+        inner.mar + c(0, 0, 0, 1)
+    )
   plot.new()
   plot.window(xlim, range(lx))
   # plot.null(yy)
