@@ -96,11 +96,15 @@ cleanfp.crr <- function(x, formula, data, exp = TRUE, conf.int = 0.95,
 #' @export
 cleanfp.crr2 <- function(x, which = 1L, exp = TRUE, conf.int = 0.95,
                          digits = 2L, format_pval = TRUE) {
-  assert_class(x, c('crr', 'crr2'))
+  x <- if (any(class(x) %in% 'crr2_list'))
+    x[[which]] else {
+      assert_class(x, c('crr2', 'crr'))
+      x
+    }
   mf <- attr(x, 'model.frame')
   
-  cleanfp(x[[which]], reformulate(colnames(mf)), mf,
-          exp, conf.int, digits, format_pval)
+  cleanfp(structure(x, class = 'crr'), reformulate(colnames(mf)),
+          mf, exp, conf.int, digits, format_pval)
 }
 
 #' @export
