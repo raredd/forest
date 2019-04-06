@@ -63,7 +63,9 @@
 #' prep_list <- prepare_forest(clean_ref)
 #' plot(prep_list)
 #' 
-#' forest(x)
+#' ## or
+#' forest(x, header = c('Age in years', 'Sex', 'ECOG PS'))
+#' 
 #' 
 #' ## plot.forest gives more options
 #' plot(prep_list, xlim = c(0, 2.5),
@@ -130,7 +132,7 @@
 
 forest <- function(x, ..., header = FALSE, plotArgs = list(), plot = TRUE) {
   x <- cleanfp(x, ...)
-  x <- add_reference(x, header)
+  x <- add_reference(x, header = header)
   x <- prepare_forest(x)
   
   if (plot)
@@ -205,7 +207,7 @@ plot.forest <- function(x, panel_size = c(0.3, 0.45, 0.25),
   
   plot.new()
   # par(...)
-  plot.window(1:2, range(lx))
+  plot.window(1:2, range(lx, finite = TRUE))
   # m <- matrix(c(1,1,1,2,3,4,5,5,5), 3L, byrow = TRUE)
   # layout(m, heights = c(1, 10, 1))
   # plot.null()
@@ -264,7 +266,7 @@ plot.forest <- function(x, panel_size = c(0.3, 0.45, 0.25),
   
   ## center panel
   yy <- rev(lx)
-  rn <- range(unlist(nn), na.rm = TRUE)
+  rn <- range(unlist(nn), na.rm = TRUE, finite = TRUE)
   
   ## get xlim if given, force min at 0
   xlim <- xlim %||% c(0, max(rn))
@@ -302,8 +304,7 @@ bars <- function(x, cols = c(grey(.95), NA), horiz = TRUE, fullspan = TRUE) {
   # plot(1:10, type = 'n'); bars(1:10, fullspan = FALSE)
   # plot(1:10, type = 'n'); bars(1:10, c(1,1,2), fullspan = TRUE)
   p <- if (fullspan)
-    c(grconvertX(c(0, 1), 'ndc', 'user'),
-      grconvertY(c(0, 1), 'ndc', 'user'))
+    c(grconvertX(c(0, 1), 'ndc'), grconvertY(c(0, 1), 'ndc'))
   else par('usr')
   
   # cols <- vec(cols[1], cols[2], which(!x %% 2), length(x))
