@@ -319,7 +319,7 @@ bars <- function(x, cols = c(grey(.95), NA), horiz = TRUE, fullspan = TRUE) {
 }
 
 plot_text <- function(x, width = range(seq_along(x)), ...) {
-  # plot(col(mtcars), row(mtcars), type = 'n'); plot_text(mtcars)
+  # plot(col(mtcars), row(mtcars), type = 'n'); forest:::plot_text(mtcars)
   lx <- lengths(x)[1L]
   rn <- range(seq_along(x))
   sx <- (seq_along(x) - 1L) / diff(rn) * diff(width) + width[1]
@@ -341,11 +341,9 @@ plot.null <- function(window) {
 
 vec <- function(default, replacement, idx, n) {
   # vec(1, 0, 2:3, 5); vec(1:5, 0, 2:3)
-  out <- if (missing(n))
+  res <- if (missing(n))
     default else rep(default, n)
-  out[idx] <- replacement
-  
-  out
+  replace(res, idx, replacement)
 }
 
 vtext <- function(...) {
