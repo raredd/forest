@@ -141,6 +141,7 @@ panel_ci <- function(data, y = rev(seq.int(nrow(data))),
            
            angles <- cbind(lower = ifelse(idxl, 45, 90),
                            upper = ifelse(idxh, 45, 90))
+           angles[is.na(angles)] <- 45
            
            varrows <- Vectorize(arrows, c('code', 'angle'))
            for (ii in seq_along(y)) {

@@ -297,7 +297,7 @@ cleanfp.formula <- function(formula = formula(data), data, conf.int = 0.95,
   
   structure(
     list(cleanfp = res, object = list(formula = formula, data = data),
-         model.frame = mf),
+         model.frame = mf, order = o),
     class = c('forest', 'cleanfp')
   )
 }
