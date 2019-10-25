@@ -7,13 +7,18 @@
 
 
 #' @export
-add_reference <- function(x, header = FALSE) {
+add_reference <- function(x, header = FALSE, keep_strata = FALSE) {
   assert_class(x, 'cleanfp')
   mf   <- x$model.frame %||% model.frame(x[[2L]])
   nums <- lapply(mf, get_n)
   vars <- colnames(mf)[-1L]
   lbls <- if (is.logical(header))
     NULL else header
+  
+  if (!keep_strata) {
+    vars <- grep('strata\\(', vars, invert = TRUE, value = TRUE)
+    nums <- nums[grep('strata\\(', names(nums), invert = TRUE, value = TRUE)]
+  }
   
   ## add suffixes for ordered factors to merge
   ord  <- sapply(mf, is.ordered)
