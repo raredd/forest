@@ -8,29 +8,45 @@
 forest(x, ..., header = FALSE, plotArgs = list(), plot = TRUE)
 
 \method{plot}{forest}(x, panel_size = c(0.3, 0.45, 0.25), col.rows,
-  center_panel = NULL, header = FALSE, type = c("ci", "box", "tplot"),
-  show_conf = FALSE, labels = NULL, xlim = NULL, axes = TRUE,
-  logx = FALSE, inner.mar = c(0, 0, 0, 0), reset_par = TRUE, ...)
+  center_panel = NULL, header = FALSE, type = c("ci", "box",
+  "tplot"), show_percent = TRUE, names = NULL, show_conf = FALSE,
+  labels = NULL, xlim = NULL, axes = TRUE, logx = FALSE,
+  inner.mar = c(0, 0, 0, 0), reset_par = TRUE, layout = c("split",
+  "unified"), ...)
 }
 \arguments{
 \item{x}{an object returned by \code{\link{prepare_list}} or an object of
 a supported class}
 
-\item{...}{additional arguments passed to other methods}
+\item{...}{additional arguments passed to other methods or graphical
+parameters passed to \code{\link{par}}}
 
 \item{header}{logical or a vector of character strings used as labels for
 each variable in the model}
+
+\item{plotArgs}{a named list of additional arguments passed to
+\code{plot.forest}}
 
 \item{plot}{logical; if \code{TRUE}, a forest plot is generated; otherwise,
 a list of data to plot is returned (see \code{plot.forest})}
 
 \item{panel_size}{proportional size of \code{c(left, middle, right)} panels}
 
+\item{col.rows}{optional vector of colors for each row}
+
+\item{center_panel}{(dev) optional function used to draw the plot}
+
 \item{type}{type of plot for middle panel (currently only \code{"point"}) is
 supported}
 
+\item{show_percent}{logical; if \code{TRUE}, percents are shown for each row}
+
+\item{names}{optional vector of length 4 giving the labels for each column}
+
 \item{show_conf}{logical; if \code{TRUE}, the confidence interval is show
 with the estimate}
+
+\item{labels}{optional vector of labels for each row term}
 
 \item{xlim}{the x-axis limits of the plot}
 
@@ -39,11 +55,14 @@ show a custom axis, set \code{reset_par = FALSE} and use \code{\link{axis}}}
 
 \item{logx}{logical; if \code{TRUE}, the x-axis will be logarithmic}
 
+\item{inner.mar}{margins for the plot panel}
+
 \item{reset_par}{logical; if \code{TRUE}, the graphical parameters are
 reset to their state before the function call; use \code{FALSE} to
 continue adding to the middle panel figure}
 
-\item{...}{additional graphical parameters passed to \code{\link{par}}}
+\item{layout}{layout of figure, either \code{"split"} where plot splits
+the text columns or \code{"unified"} where the text columns are adjacent}
 }
 \description{
 A forest plot.
@@ -64,6 +83,10 @@ x <- coxph(Surv(time, status) ~ age + sex + ph.ecog +
 x <- forest(x)
 plot(x, show_conf = TRUE)
 
+palette(c('grey70', 'green4'))
+plot(x, show_conf = TRUE, cex = 3)
+palette('default')
+
 
 ## equivalent ways to make forest plot
 x <- coxph(Surv(time, status) ~ age + sex + ph.ecog, lung2)
@@ -72,7 +95,9 @@ clean_ref <- add_reference(clean)
 prep_list <- prepare_forest(clean_ref)
 plot(prep_list)
 
-forest(x)
+## or
+forest(x, header = c('Age in years', 'Sex', 'ECOG PS'))
+
 
 ## plot.forest gives more options
 plot(prep_list, xlim = c(0, 2.5),
@@ -82,11 +107,10 @@ plot(prep_list, xlim = c(0, 2.5),
      })
 
 
-fp <- forest(glm(vs ~ factor(gear) + wt + factor(am), mtcars,
+fp <- forest(glm(vs ~ factor(gear) + wt + hp, mtcars,
                  family = 'binomial'),
              plot = FALSE)
-plot(fp,
-  labels = c(paste('Gear -', 3:5), 'Weight (1000 lbs)', 'Automatic', 'Manual'))
+plot(fp, labels = c(paste('Gear -', 3:5), 'Weight (1k lbs)', 'Horse Power'))
 
 
 ## multiple models

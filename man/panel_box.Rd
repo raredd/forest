@@ -5,7 +5,8 @@
 \title{Panel \code{boxplot}}
 \usage{
 panel_box(data, y = seq.int(length(data)), col = 1L, axes = FALSE,
-  logx = FALSE, add = TRUE, panel.first = NULL, panel.last = NULL, ...)
+  logx = FALSE, add = TRUE, panel.first = NULL, panel.last = NULL,
+  ...)
 }
 \arguments{
 \item{data}{a list or data frame for each boxplot}
@@ -45,3 +46,4 @@ panel_box(l, add = FALSE, axes = FALSE,
 Other panel functions: \code{\link{panel_ci}},
   \code{\link{panel_tplot}}
 }
+\concept{panel functions}
