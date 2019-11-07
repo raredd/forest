@@ -14,26 +14,34 @@
 #' 
 #' @param x an object returned by \code{\link{prepare_list}} or an object of
 #' a supported class
+#' @param ... additional arguments passed to other methods or graphical
+#' parameters passed to \code{\link{par}}
 #' @param header logical or a vector of character strings used as labels for
 #' each variable in the model
-#' @param ... additional arguments passed to other methods
+#' @param plotArgs a named list of additional arguments passed to
+#' \code{plot.forest}
 #' @param plot logical; if \code{TRUE}, a forest plot is generated; otherwise,
 #' a list of data to plot is returned (see \code{plot.forest})
 #' @param panel_size proportional size of \code{c(left, middle, right)} panels
+#' @param col.rows optional vector of colors for each row
+#' @param center_panel (dev) optional function used to draw the plot
 #' @param type type of plot for middle panel (currently only \code{"point"}) is
 #' supported
+#' @param show_percent logical; if \code{TRUE}, percents are shown for each row
+#' @param names optional vector of length 4 giving the labels for each column
 #' @param show_conf logical; if \code{TRUE}, the confidence interval is show
 #' with the estimate
+#' @param labels optional vector of labels for each row term
 #' @param xlim the x-axis limits of the plot
 #' @param axes logical; if \code{TRUE}, the x-axis is plotted (default); to
 #' show a custom axis, set \code{reset_par = FALSE} and use \code{\link{axis}}
 #' @param logx logical; if \code{TRUE}, the x-axis will be logarithmic
+#' @param inner.mar margins for the plot panel
 #' @param reset_par logical; if \code{TRUE}, the graphical parameters are
 #' reset to their state before the function call; use \code{FALSE} to
 #' continue adding to the middle panel figure
 #' @param layout layout of figure, either \code{"split"} where plot splits
 #' the text columns or \code{"unified"} where the text columns are adjacent
-#' @param ... additional graphical parameters passed to \code{\link{par}}
 #' 
 #' @examples
 #' library('survival')
@@ -145,8 +153,8 @@ forest <- function(x, ..., header = FALSE, plotArgs = list(), plot = TRUE) {
 #' @export
 plot.forest <- function(x, panel_size = c(0.3, 0.45, 0.25),
                         col.rows, center_panel = NULL, header = FALSE,
-                        type = c('ci', 'box', 'tplot'),
-                        show_conf = FALSE, labels = NULL,
+                        type = c('ci', 'box', 'tplot'), show_percent = TRUE,
+                        names = NULL, show_conf = FALSE, labels = NULL,
                         xlim = NULL, axes = TRUE, logx = FALSE,
                         inner.mar = c(0, 0, 0, 0), reset_par = TRUE,
                         layout = c('split', 'unified'), ...) {
@@ -216,29 +224,32 @@ plot.forest <- function(x, panel_size = c(0.3, 0.45, 0.25),
   # plot.null(lx)
   col.rows <- if (missing(col.rows)) {
     grp <- as.integer(ox$cleanfp_ref[[1L]]$group)
-    rep(c(grey(.95), NA), length(grp))[grp]
+    rep(c(grey(0.95), NA), length(grp))[grp]
   } else replace(col.rows, col.rows %in% 'none', NA)
   bars(lx, col.rows, TRUE, TRUE)
   
   
   ## left panel
-  lp <- x[1:2]
+  lp <- x[c('Term', 'N')]
+  if (show_percent) {
+    lp$N <- sprintf('%s (%s)', lp$N, round(x$P * 100))
+    names(lp)[2L] <- 'N (%)'
+  }
+  
   if (layout == 'split')
     par(fig = c(0, xcf[1L], 0, 1))
-  else par(fig = c(0, xcf[1L] * .9, 0, 1))
+  else par(fig = c(0, xcf[1L] * 0.9, 0, 1))
   # plot.null(lp)
-  plot_text(lp, c(1, 2),
-            col = vec('black', 'darkgrey', which_ref, nr),
-            adj = rep(c(0, 0.5), each = nr),
-            # font = vec(1, 3, c(1,5), 10)
-            font = 1L
+  plot_text(
+    lp, 1:2, col = vec('black', 'darkgrey', which_ref, nr),
+    adj = rep(c(0, 0.5), each = nr), font = 1L # font = vec(1, 3, c(1,5), 10)
   ) -> at
-  vtext(unique(at$x), max(at$y) + c(1, 1), names(lp),
+  vtext(unique(at$x), max(at$y) + c(1, 1), names[1:2] %||% names(lp),
         font = 2, xpd = NA, adj = c(0, 0.5))
   
   
   ## right panel
-  rp <- x[c(4:3,3)]
+  rp <- x[c('Estimate', 'p-value', 'p-value')]
   if (show_conf) {
     rp[[1L]] <- ifelse(
       grepl('Reference', rp[[1L]]), rp[[1L]],
@@ -259,7 +270,7 @@ plot.forest <- function(x, panel_size = c(0.3, 0.45, 0.25),
             font = rep(1L, length(x$Term)),
             adj = rep_len(0.5, length(x$Term))
   ) -> at
-  vtext(unique(at$x), max(at$y) + c(1, 1, 1), names(rp),
+  vtext(unique(at$x), max(at$y) + c(1, 1, 1), names[c(3:4, 4)] %||% names(rp),
         font = 2L, xpd = NA, adj = c(NA, NA, 1),
         col = c(palette()[1:2], 'transparent'))
   

@@ -11,6 +11,7 @@ add_reference <- function(x, header = FALSE, keep_strata = FALSE) {
   assert_class(x, 'cleanfp')
   mf   <- x$model.frame %||% model.frame(x[[2L]])
   nums <- lapply(mf, get_n)
+  pcts <- lapply(mf, get_n, percent = TRUE)
   vars <- colnames(mf)[-1L]
   lbls <- if (is.logical(header))
     NULL else header
@@ -18,6 +19,7 @@ add_reference <- function(x, header = FALSE, keep_strata = FALSE) {
   if (!keep_strata) {
     vars <- grep('strata\\(', vars, invert = TRUE, value = TRUE)
     nums <- nums[grep('strata\\(', names(nums), invert = TRUE, value = TRUE)]
+    pcts <- pcts[grep('strata\\(', names(pcts), invert = TRUE, value = TRUE)]
   }
   
   ## add suffixes for ordered factors to merge
@@ -45,6 +47,7 @@ add_reference <- function(x, header = FALSE, keep_strata = FALSE) {
   
   if (!identical(header, FALSE)) {
     nums[] <- Map(c, NA, nums)
+    pcts[] <- Map(c, NA, pcts)
     mn <- Map(c, lbls %||% sprintf('header-%s', names(nums)[-1L]), nn)
     rn <- unlist(mn)
     mm <- matrix(NA, length(rn), 0L, dimnames = list(rn))
@@ -66,6 +69,7 @@ add_reference <- function(x, header = FALSE, keep_strata = FALSE) {
   })
   
   dd$N <- unlist(nums[-1L])
+  dd$P <- unlist(pcts[-1L])
   
   rownames(dd) <- rownames(dd_n) <- NULL
   
@@ -75,9 +79,12 @@ add_reference <- function(x, header = FALSE, keep_strata = FALSE) {
   )
 }
 
-get_n <- function(x) {
-  if (is.numeric(x))
+get_n <- function(x, percent = FALSE) {
+  n <- if (is.numeric(x))
     length(sort(x)) else table(x)
+  
+  if (percent)
+    n / length(x) else n
 }
 
 #' @export
@@ -105,6 +112,7 @@ prepare_forest <- function(x) {
   l <- list(
     Term      = xx$Row.names,
     N         = xx$N,
+    P         = xx$P,
     'p-value' = xx$p.value,
     Estimate  = xx[, grep('coef', names(xx))],
     text = list(
