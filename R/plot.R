@@ -233,6 +233,7 @@ plot.forest <- function(x, panel_size = c(0.3, 0.45, 0.25),
   lp <- x[c('Term', 'N')]
   if (show_percent) {
     lp$N <- sprintf('%s (%s)', lp$N, round(x$P * 100))
+    lp$N[grepl('NA', lp$N)] <- ''
     names(lp)[2L] <- 'N (%)'
   }
   
@@ -244,18 +245,20 @@ plot.forest <- function(x, panel_size = c(0.3, 0.45, 0.25),
     lp, 1:2, col = vec('black', 'darkgrey', which_ref, nr),
     adj = rep(c(0, 0.5), each = nr), font = 1L # font = vec(1, 3, c(1,5), 10)
   ) -> at
-  vtext(unique(at$x), max(at$y) + c(1, 1), names[1:2] %||% names(lp),
-        font = 2, xpd = NA, adj = c(0, 0.5))
+  vtext(
+    unique(at$x), max(at$y) + c(1, 1), names[1:2] %||% names(lp),
+    font = 2, xpd = NA, adj = c(0, 0.5)
+  )
   
   
   ## right panel
   rp <- x[c('Estimate', 'p-value', 'p-value')]
   if (show_conf) {
-    rp[[1L]] <- ifelse(
+    rp$Estimate <- ifelse(
       grepl('Reference', rp[[1L]]), rp[[1L]],
-      sprintf('%s (%s, %s)', rp[[1L]], x[[5]][[2L]], x[[5]][[3L]])
+      sprintf('%s (%s, %s)', rp[[1L]], x$text$low, x$text$high)
     )
-    rp[[1L]] <- gsub('(NA.*){3}', '', rp[[1L]])
+    rp$Estimate <- gsub('(NA.*){3}', '', rp$Estimate)
     names(rp)[1L] <- 'Estimate (LCI, UCI)'
   }
   if (layout == 'split')
@@ -264,15 +267,17 @@ plot.forest <- function(x, panel_size = c(0.3, 0.45, 0.25),
   
   
   # plot.null(rp)
-  plot_text(rp, c(1, 2.5),
-            col = c(vec('black', 'darkgrey', which_ref, nr),
-                    col, rep('transparent', length(x$Term))),
-            font = rep(1L, length(x$Term)),
-            adj = rep_len(0.5, length(x$Term))
+  plot_text(
+    rp, c(1, 2.5),
+    col = c(vec('black', 'darkgrey', which_ref, nr),
+            col,
+            rep('transparent', length(x$Term))),
+    font = rep(1L, length(x$Term)), adj = rep_len(0.5, length(x$Term))
   ) -> at
-  vtext(unique(at$x), max(at$y) + c(1, 1, 1), names[c(3:4, 4)] %||% names(rp),
-        font = 2L, xpd = NA, adj = c(NA, NA, 1),
-        col = c(palette()[1:2], 'transparent'))
+  vtext(
+    unique(at$x), max(at$y) + c(1, 1, 1), names[c(3:4, 4)] %||% names(rp),
+    font = 2L, xpd = NA, adj = c(NA, NA, 1), col = c(palette()[1:2], 'transparent')
+  )
   
   
   ## center panel
