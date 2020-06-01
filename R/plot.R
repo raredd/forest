@@ -226,13 +226,13 @@ plot.forest <- function(x, panel_size = c(0.3, 0.45, 0.25),
     grp <- as.integer(ox$cleanfp_ref[[1L]]$group)
     rep(c(grey(0.95), NA), length(grp))[grp]
   } else replace(col.rows, col.rows %in% 'none', NA)
-  bars(lx, col.rows, TRUE, TRUE)
+  lims <- bars(lx, col.rows, TRUE, TRUE)
   
   
   ## left panel
   lp <- x[c('Term', 'N')]
   if (show_percent) {
-    lp$N <- sprintf('%s (%s)', lp$N, round(x$P * 100))
+    lp$N <- sprintf('%s (%s)', format(lp$N, big.mark = ','), round(x$P * 100))
     lp$N[grepl('NA', lp$N)] <- ''
     names(lp)[2L] <- 'N (%)'
   }
@@ -304,21 +304,18 @@ plot.forest <- function(x, panel_size = c(0.3, 0.45, 0.25),
     )
   plot.new()
   plot.window(xlim, range(lx))
-  # plot.null(yy)
-  # par(new = TRUE, xaxs = 'i',
-  #     mar = pmin(par('mar'), c(NA, 1, NA, NA), na.rm = TRUE) + inner.mar)
   
   if (missing(center_panel)) {
     panel_fn(nn, yy, type = 'n', xlim = xlim, logx = logx, col = col, ...)
-    axis(1L)
+    axis(1L, pos = lims$y[1L])
   } else eval(center_panel)
   
   invisible(op)
 }
 
 bars <- function(x, cols = c(grey(.95), NA), horiz = TRUE, fullspan = TRUE) {
-  # plot(1:10, type = 'n'); bars(1:10, fullspan = FALSE)
-  # plot(1:10, type = 'n'); bars(1:10, c(1,1,2), fullspan = TRUE)
+  # plot(1:10, type = 'n'); forest:::bars(1:10, fullspan = FALSE)
+  # plot(1:10, type = 'n'); forest:::bars(1:10, c(1,1,2), fullspan = TRUE)
   p <- if (fullspan)
     c(grconvertX(c(0, 1), 'ndc'), grconvertY(c(0, 1), 'ndc'))
   else par('usr')
@@ -331,7 +328,11 @@ bars <- function(x, cols = c(grey(.95), NA), horiz = TRUE, fullspan = TRUE) {
     rect(p[1L], x - 1L, p[2L], x, border = NA, col = cols, xpd = NA)
   else rect(x - 1L, p[3L], x, p[4L], border = NA, col = rev(cols), xpd = NA)
   
-  invisible(NULL)
+  range <- if (horiz)
+    list(x = p[1:2], y = range(c(x, x - 1)))
+  else list(x = range(c(x, x - 1)), y = p[3:4])
+  
+  invisible(range)
 }
 
 plot_text <- function(x, width = range(seq_along(x)), ...) {
