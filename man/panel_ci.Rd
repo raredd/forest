@@ -4,10 +4,21 @@
 \alias{panel_ci}
 \title{Panel CI}
 \usage{
-panel_ci(data, y = rev(seq.int(nrow(data))), col = 1L, cex = NULL,
-  pch = NULL, xlim = extendrange(unlist(data)), limits = xlim,
-  logx = FALSE, panel.first = NULL, panel.last = NULL, vline = 1,
-  type, ...)
+panel_ci(
+  data,
+  y = rev(seq.int(nrow(data))),
+  col = 1L,
+  cex = NULL,
+  pch = NULL,
+  xlim = extendrange(unlist(data)),
+  limits = xlim,
+  logx = FALSE,
+  panel.first = NULL,
+  panel.last = NULL,
+  vline = 1,
+  type,
+  ...
+)
 }
 \arguments{
 \item{data}{a data frame or matrix with three columns containing the
@@ -51,7 +62,8 @@ panel_ci(dd[1:10, ], limits = c(0.25, 0.95))
 
 }
 \seealso{
-Other panel functions: \code{\link{panel_box}},
-  \code{\link{panel_tplot}}
+Other panel functions: 
+\code{\link{panel_box}()},
+\code{\link{panel_tplot}()}
 }
 \concept{panel functions}

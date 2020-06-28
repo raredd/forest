@@ -4,9 +4,17 @@
 \alias{panel_tplot}
 \title{Panel \code{tplot}}
 \usage{
-panel_tplot(data, y = seq.int(length(data)), col = 1L, axes = FALSE,
-  logx = FALSE, add = TRUE, panel.first = NULL, panel.last = NULL,
-  ...)
+panel_tplot(
+  data,
+  y = seq.int(length(data)),
+  col = 1L,
+  axes = FALSE,
+  logx = FALSE,
+  add = TRUE,
+  panel.first = NULL,
+  panel.last = NULL,
+  ...
+)
 }
 \arguments{
 \item{data}{a list or data frame for each tplot}
@@ -49,7 +57,8 @@ panel_tplot(l, type = 'd', col = 1:5, pch = 19, add = FALSE,
 \seealso{
 \code{\link[rawr]{tplot}}
 
-Other panel functions: \code{\link{panel_box}},
-  \code{\link{panel_ci}}
+Other panel functions: 
+\code{\link{panel_box}()},
+\code{\link{panel_ci}()}
 }
 \concept{panel functions}

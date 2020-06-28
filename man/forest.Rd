@@ -7,12 +7,25 @@
 \usage{
 forest(x, ..., header = FALSE, plotArgs = list(), plot = TRUE)
 
-\method{plot}{forest}(x, panel_size = c(0.3, 0.45, 0.25), col.rows,
-  center_panel = NULL, header = FALSE, type = c("ci", "box",
-  "tplot"), show_percent = TRUE, names = NULL, show_conf = FALSE,
-  labels = NULL, xlim = NULL, axes = TRUE, logx = FALSE,
-  inner.mar = c(0, 0, 0, 0), reset_par = TRUE, layout = c("split",
-  "unified"), ...)
+\method{plot}{forest}(
+  x,
+  panel_size = c(0.3, 0.45, 0.25),
+  col.rows,
+  center_panel = NULL,
+  header = FALSE,
+  type = c("ci", "box", "tplot"),
+  show_percent = TRUE,
+  names = NULL,
+  show_conf = FALSE,
+  labels = NULL,
+  xlim = NULL,
+  axes = TRUE,
+  logx = FALSE,
+  inner.mar = c(0, 0, 0, 0),
+  reset_par = TRUE,
+  layout = c("split", "unified"),
+  ...
+)
 }
 \arguments{
 \item{x}{an object returned by \code{\link{prepare_list}} or an object of
