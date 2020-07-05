@@ -9,8 +9,10 @@ forest(x, ..., header = FALSE, plotArgs = list(), plot = TRUE)
 
 \method{plot}{forest}(
   x,
-  panel_size = c(0.3, 0.45, 0.25),
+  panel_size = c(1, 1.5, 0.8),
   col.rows,
+  at.text = NULL,
+  left_panel = NULL,
   center_panel = NULL,
   header = FALSE,
   type = c("ci", "box", "tplot"),
@@ -93,12 +95,16 @@ x <- coxph(Surv(time, status) ~ age + sex + ph.ecog +
              I(ph.karno > 85) +
              I(pat.karno > 65), lung2)
              
-x <- forest(x)
+x <- forest(x, plot = FALSE)
 plot(x, show_conf = TRUE)
 
 palette(c('grey70', 'green4'))
 plot(x, show_conf = TRUE, cex = 3)
 palette('default')
+
+## add extra columns to left panel
+plot(x, show_conf = TRUE, panel_size = c(1.5, 1.5, 1), layout = 'unified',
+     left_panel = list(HR = x$cleanfp_list$numeric$`exp(coef)`))
 
 
 ## equivalent ways to make forest plot

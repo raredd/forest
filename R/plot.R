@@ -56,12 +56,16 @@
 #'              I(ph.karno > 85) +
 #'              I(pat.karno > 65), lung2)
 #'              
-#' x <- forest(x)
+#' x <- forest(x, plot = FALSE)
 #' plot(x, show_conf = TRUE)
 #' 
 #' palette(c('grey70', 'green4'))
 #' plot(x, show_conf = TRUE, cex = 3)
 #' palette('default')
+#' 
+#' ## add extra columns to left panel
+#' plot(x, show_conf = TRUE, panel_size = c(1.5, 1.5, 1), layout = 'unified',
+#'      left_panel = list(HR = x$cleanfp_list$numeric$`exp(coef)`))
 #' 
 #' 
 #' ## equivalent ways to make forest plot
@@ -151,8 +155,8 @@ forest <- function(x, ..., header = FALSE, plotArgs = list(), plot = TRUE) {
 
 #' @rdname forest
 #' @export
-plot.forest <- function(x, panel_size = c(0.3, 0.45, 0.25),
-                        col.rows, center_panel = NULL, header = FALSE,
+plot.forest <- function(x, panel_size = c(1, 1.5, 0.8), col.rows, at.text = NULL,
+                        left_panel = NULL, center_panel = NULL, header = FALSE,
                         type = c('ci', 'box', 'tplot'), show_percent = TRUE,
                         names = NULL, show_conf = FALSE, labels = NULL,
                         xlim = NULL, axes = TRUE, logx = FALSE,
@@ -211,6 +215,7 @@ plot.forest <- function(x, panel_size = c(0.3, 0.45, 0.25),
   
   lx <- seq_along(x[[1L]])
   nx <- length(lx)
+  panel_size <- panel_size / sum(panel_size)
   xcf <- cumsum(panel_size)[-length(panel_size)]
   
   plot.new()
@@ -231,6 +236,8 @@ plot.forest <- function(x, panel_size = c(0.3, 0.45, 0.25),
   
   ## left panel
   lp <- x[c('Term', 'N')]
+  lp <- c(lp, left_panel)
+  nlp <- seq_along(lp)
   if (show_percent) {
     lp$N <- sprintf('%s (%s)', format(lp$N, big.mark = ','), round(x$P * 100))
     lp$N[grepl('NA', lp$N)] <- ''
@@ -241,18 +248,21 @@ plot.forest <- function(x, panel_size = c(0.3, 0.45, 0.25),
     par(fig = c(0, xcf[1L], 0, 1))
   else par(fig = c(0, xcf[1L] * 0.9, 0, 1))
   # plot.null(lp)
+  adj <- c(0, rep(0.5, length(lp) - 1L))
   plot_text(
     lp, 1:2, col = vec('black', 'darkgrey', which_ref, nr),
-    adj = rep(c(0, 0.5), each = nr), font = 1L # font = vec(1, 3, c(1,5), 10)
+    adj = rep(adj, each = nr), font = 1L, at = at.text[nlp]
   ) -> at
   vtext(
-    unique(at$x), max(at$y) + c(1, 1), names[1:2] %||% names(lp),
-    font = 2, xpd = NA, adj = c(0, 0.5)
+    unique(at$x), max(at$y) + rep_len(1L, length(lp)),
+    names[nlp] %||% names(lp), font = 2, xpd = NA, adj = adj
   )
   
   
   ## right panel
   rp <- x[c('Estimate', 'p-value', 'p-value')]
+  rp <- c(rp, NULL)
+  np <- seq_along(rp)
   if (show_conf) {
     rp$Estimate <- ifelse(
       grepl('Reference', rp[[1L]]), rp[[1L]],
@@ -265,17 +275,16 @@ plot.forest <- function(x, panel_size = c(0.3, 0.45, 0.25),
     par(fig = c(tail(xcf, -1L), 1, 0, 1))
   else par(fig = c(xcf[1L] * 1.1, xcf[1L] * 1.75, 0, 1))
   
-  
   # plot.null(rp)
   plot_text(
-    rp, c(1, 2.5),
+    rp, c(1, 2.5), at = at.text[-(nlp)],
     col = c(vec('black', 'darkgrey', which_ref, nr),
             col,
             rep('transparent', length(x$Term))),
     font = rep(1L, length(x$Term)), adj = rep_len(0.5, length(x$Term))
   ) -> at
   vtext(
-    unique(at$x), max(at$y) + c(1, 1, 1), names[c(3:4, 4)] %||% names(rp),
+    unique(at$x), max(at$y) + c(1, 1, 1), names[c(1:2, 2) + length(lp)] %||% names(rp),
     font = 2L, xpd = NA, adj = c(NA, NA, 1), col = c(palette()[1:2], 'transparent')
   )
   
@@ -335,11 +344,22 @@ bars <- function(x, cols = c(grey(.95), NA), horiz = TRUE, fullspan = TRUE) {
   invisible(range)
 }
 
-plot_text <- function(x, width = range(seq_along(x)), ...) {
+plot_text <- function(x, width = range(seq_along(x)), at = NULL, ...) {
   # plot(col(mtcars), row(mtcars), type = 'n'); forest:::plot_text(mtcars)
   lx <- lengths(x)[1L]
   rn <- range(seq_along(x))
-  sx <- (seq_along(x) - 1L) / diff(rn) * diff(width) + width[1]
+  # sx <- (seq_along(x) - 1L) / diff(rn) * c(1, diff(width)) + width[1L]
+  # sx <- cumsum(sapply(head(x, -1), function(x) max(strwidth(x))))
+  # sx <- rescaler(c(0, sx), 1:2)
+  sx <- c(1, sapply(head(x, -1), function(x) {
+    xx <- grep('^\\s+', x, value = TRUE)
+    if (!length(xx))
+      xx <- x
+    max(strwidth(trimws(xx, which = 'right')))
+  }))
+  sx <- rescaler(cumsum(sx), 1:2)
+  if (!is.null(at))
+    sx <- grconvertX(at, 'ndc')
   xx <- rep(sx, each = lx)
   yy <- rep(rev(seq.int(lx)), length(x))
   vtext(xx, yy, unlist(x), ..., xpd = NA)
