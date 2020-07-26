@@ -18,6 +18,10 @@
 #' parameters passed to \code{\link{par}}
 #' @param header logical or a vector of character strings used as labels for
 #' each variable in the model
+#' @param total optional argument to give total number of observations, useful
+#' for models which have already removed missing observations; by default,
+#' the percentages will be relative to fitted models rather than total
+#' observations; see examples
 #' @param plotArgs a named list of additional arguments passed to
 #' \code{plot.forest}
 #' @param plot logical; if \code{TRUE}, a forest plot is generated; otherwise,
@@ -48,6 +52,7 @@
 #' lung2 <- within(lung, {
 #'   sex <- factor(sex, 1:2, c('Male','Female'))
 #'   ph.ecog <- factor(ph.ecog, 0:2)
+#'   age2 <- replace(age, sample(nrow(lung), 50), NA)
 #' })
 #' 
 #' x <- coxph(Surv(time, status) ~ age + sex + ph.ecog +
@@ -66,6 +71,12 @@
 #' ## add extra columns to left panel
 #' plot(x, show_conf = TRUE, panel_size = c(1.5, 1.5, 1), layout = 'unified',
 #'      left_panel = list(HR = x$cleanfp_list$numeric$`exp(coef)`))
+#' 
+#' ## use percents with respect to all data rather than fitted data
+#' forest(coxph(Surv(time, status) ~ age2 + sex + ph.ecog, lung2),
+#'        total = nrow(lung2))
+#' ## compare
+#' forest(coxph(Surv(time, status) ~ age2 + sex + ph.ecog, lung2))
 #' 
 #' 
 #' ## equivalent ways to make forest plot
@@ -116,7 +127,6 @@
 #'       cov1 = cbind(age, model.matrix(~ sex + abo)[, -1, drop = FALSE])))
 #' forest(x, ~ age + sex + abo, transplant)
 #' 
-#' 
 #' library('cmprsk2')
 #' x <- crr2(Surv(futime, event(censored) == death) ~ age + sex + abo, transplant)
 #' forest(x)
@@ -128,23 +138,22 @@
 #'   futime <- futime + 1e-8
 #' })
 #' 
-#' 
-#' ## coxphf model
+#' ## survival::coxph model
 #' x <- coxph(Surv(futime, event_ind) ~ age + sex + abo, dat)
 #' x <- forest(x, plot = FALSE)
 #' plot(x, show_conf = TRUE, xlim = c(0, 5))
 #' 
-#' 
-#' ## coxphf model
+#' ## coxphf::coxphf model
 #' library('coxphf')
 #' x <- coxphf(Surv(futime, event_ind) ~ age + sex + abo, dat)
 #' forest(x, data = dat)
 #' 
 #' @export
 
-forest <- function(x, ..., header = FALSE, plotArgs = list(), plot = TRUE) {
+forest <- function(x, ..., header = FALSE, total = NULL,
+                   plotArgs = list(), plot = TRUE) {
   x <- cleanfp(x, ...)
-  x <- add_reference(x, header = header)
+  x <- add_reference(x, header = header, total = total)
   x <- prepare_forest(x)
   
   if (plot)

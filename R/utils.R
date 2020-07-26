@@ -7,11 +7,11 @@
 
 
 #' @export
-add_reference <- function(x, header = FALSE, keep_strata = FALSE) {
+add_reference <- function(x, header = FALSE, keep_strata = FALSE, total = NULL) {
   assert_class(x, 'cleanfp')
   mf   <- x$model.frame %||% model.frame(x[[2L]])
   nums <- lapply(mf, get_n)
-  pcts <- lapply(mf, get_n, percent = TRUE)
+  pcts <- lapply(mf, get_n, total = total, percent = TRUE)
   vars <- colnames(mf)[-1L]
   lbls <- if (is.logical(header))
     NULL else header
@@ -79,12 +79,14 @@ add_reference <- function(x, header = FALSE, keep_strata = FALSE) {
   )
 }
 
-get_n <- function(x, percent = FALSE) {
+get_n <- function(x, percent = FALSE, total = NULL) {
   n <- if (is.numeric(x))
     length(sort(x)) else table(x)
   
+  total <- if (is.null(total))
+    length(x) else total
   if (percent)
-    n / length(x) else n
+    n / total else n
 }
 
 #' @export
