@@ -17,6 +17,7 @@ forest(x, ..., header = FALSE, total = NULL, plotArgs = list(), plot = TRUE)
   header = FALSE,
   type = c("ci", "box", "tplot"),
   show_percent = TRUE,
+  show_columns = TRUE,
   names = NULL,
   show_conf = FALSE,
   labels = NULL,
@@ -60,6 +61,8 @@ a list of data to plot is returned (see \code{plot.forest})}
 supported}
 
 \item{show_percent}{logical; if \code{TRUE}, percents are shown for each row}
+
+\item{show_columns}{logical or a vector of logicals for each text column}
 
 \item{names}{optional vector of length 4 giving the labels for each column}
 

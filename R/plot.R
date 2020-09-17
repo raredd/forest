@@ -32,6 +32,7 @@
 #' @param type type of plot for middle panel (currently only \code{"point"}) is
 #' supported
 #' @param show_percent logical; if \code{TRUE}, percents are shown for each row
+#' @param show_columns logical or a vector of logicals for each text column
 #' @param names optional vector of length 4 giving the labels for each column
 #' @param show_conf logical; if \code{TRUE}, the confidence interval is show
 #' with the estimate
@@ -166,7 +167,8 @@ forest <- function(x, ..., header = FALSE, total = NULL,
 #' @export
 plot.forest <- function(x, panel_size = c(1, 1.5, 0.8), col.rows, at.text = NULL,
                         left_panel = NULL, center_panel = NULL, header = FALSE,
-                        type = c('ci', 'box', 'tplot'), show_percent = TRUE,
+                        type = c('ci', 'box', 'tplot'),
+                        show_percent = TRUE, show_columns = TRUE,
                         names = NULL, show_conf = FALSE, labels = NULL,
                         xlim = NULL, axes = TRUE, logx = FALSE,
                         inner.mar = c(0, 0, 0, 0), reset_par = TRUE,
@@ -222,6 +224,9 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8), col.rows, at.text = NULL
   ## identify reference lines
   which_ref <- grep('Reference', x$Estimate)
   
+  ## text columns to show
+  show_columns <- rep_len(show_columns, 4L)
+  
   lx <- seq_along(x[[1L]])
   nx <- length(lx)
   panel_size <- panel_size / sum(panel_size)
@@ -245,12 +250,17 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8), col.rows, at.text = NULL
   
   ## left panel
   lp <- x[c('Term', 'N')]
+  lp[!show_columns[1:2]] <-
+    lapply(lp[!show_columns[1:2]], function(x) rep_len(NA, length(x)))
   lp <- c(lp, left_panel)
   nlp <- seq_along(lp)
   if (show_percent) {
     lp$N <- sprintf('%s (%s)', format(lp$N, big.mark = ','), round(x$P * 100))
     lp$N[grepl('NA', lp$N)] <- ''
     names(lp)[2L] <- 'N (%)'
+  } else {
+    lp$N <- format(lp$N, big.mark = ',')
+    lp$N[grepl('NA', lp$N)] <- ''
   }
   
   if (layout == 'split')
@@ -264,6 +274,7 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8), col.rows, at.text = NULL
   ) -> at
   vtext(
     unique(at$x), max(at$y) + rep_len(1L, length(lp)),
+    col = replace(palette()[c(1, 1)], !show_columns[1:2], 'transparent'),
     names[nlp] %||% names(lp), font = 2, xpd = NA, adj = adj
   )
   
@@ -280,6 +291,9 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8), col.rows, at.text = NULL
     rp$Estimate <- gsub('(NA.*){3}', '', rp$Estimate)
     names(rp)[1L] <- 'Estimate (LCI, UCI)'
   }
+  rp[!show_columns[3:4]] <-
+    lapply(rp[!show_columns[3:4]], function(x) rep_len(NA, length(x)))
+  
   if (layout == 'split')
     par(fig = c(tail(xcf, -1L), 1, 0, 1))
   else par(fig = c(xcf[1L] * 1.1, xcf[1L] * 1.75, 0, 1))
@@ -293,8 +307,11 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8), col.rows, at.text = NULL
     font = rep(1L, length(x$Term)), adj = rep_len(0.5, length(x$Term))
   ) -> at
   vtext(
-    unique(at$x), max(at$y) + c(1, 1, 1), names[c(1:2, 2) + length(lp)] %||% names(rp),
-    font = 2L, xpd = NA, adj = c(NA, NA, 1), col = c(palette()[1:2], 'transparent')
+    unique(at$x)[1:3], max(at$y) + c(1, 1, 1),
+    names[c(1:2, 2) + length(lp)] %||% names(rp),
+    font = 2L, xpd = NA, adj = c(NA, NA, 1),
+    col = replace(c(palette()[1:2], 'transparent'),
+                  !show_columns[c(3, 4, 4)], 'transparent')
   )
   
   
