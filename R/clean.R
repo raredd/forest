@@ -265,21 +265,22 @@ cleanfp.formula <- function(formula = formula(data), data, conf.int = 0.95,
                             digits = 2L, format_pval = TRUE,
                             order = c('p.value', 'coef', 'none'),
                             decreasing = FALSE, ...) {
+  data[] <- lapply(data, as.factor)
   mf <- model.frame(formula, data, na.action = na.pass)
+  y  <- colnames(mf)[1L]
+  x  <- colnames(mf)[-1L]
   
-  y <- colnames(mf)[1L]
-  x <- colnames(mf)[-1L]
-  
-  tbl <- lapply(x, function(x) {
-    x  <- table(data[, c(y, x)])
-    ft <- try_fisher(x, conf.int = TRUE, conf.level = conf.int, ...)
-    clean_fisher(ft)
+  tbl <- lapply(x, function(xx) {
+    tt <- table(data[, c(y, xx)])
+    ft <- try_fisher(tt, conf.int = TRUE, conf.level = conf.int, ...)
+    cbind(clean_fisher(ft), name = paste0(xx, colnames(tt)[-1L]))
   })
   
   res <- do.call('rbind', tbl)
   res[1:3] <- lapply(res[1:3], roundr, digits = digits)
   names(res)[2:3] <- paste0(names(res)[2:3], ' .', round(conf.int * 100))
-  rownames(res) <- x
+  rownames(res) <- res$name
+  res$name <- NULL
   
   order <- match.arg(order)
   o <- if (order %in% c('coef', 'p.value'))
@@ -303,9 +304,7 @@ cleanfp.formula <- function(formula = formula(data), data, conf.int = 0.95,
 }
 
 clean_fisher <- function(x) {
-  stopifnot(
-    inherits(x, 'htest')
-  )
+  stopifnot(inherits(x, 'htest'))
   
   `%or%` <- function(x, y) {
     unname(if (is.null(x) || !is.finite(x)) y else x)
@@ -313,8 +312,8 @@ clean_fisher <- function(x) {
   
   data.frame(
     coef    = x$estimate %or% NA,
-    'lower' = x$conf.int[1L] %or% NA,
-    'upper' = x$conf.int[2L] %or% NA,
+    lower   = x$conf.int[1L] %or% NA,
+    upper   = x$conf.int[2L] %or% NA,
     p.value = x$p.value %or% NA
   )
 }

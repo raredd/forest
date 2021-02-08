@@ -65,19 +65,33 @@
 #' x <- forest(x, plot = FALSE)
 #' plot(x, show_conf = TRUE)
 #' 
+#' ## change the color palette
 #' palette(c('grey70', 'green4'))
 #' plot(x, show_conf = TRUE, cex = 3)
 #' palette('default')
 #' 
-#' ## add extra columns to left panel
-#' plot(x, show_conf = TRUE, panel_size = c(1.5, 1.5, 1), layout = 'unified',
-#'      left_panel = list(HR = x$cleanfp_list$numeric$`exp(coef)`))
 #' 
-#' ## use percents with respect to all data rather than fitted data
-#' forest(coxph(Surv(time, status) ~ age2 + sex + ph.ecog, lung2),
-#'        total = nrow(lung2))
+#' ## add extra columns to left panel
+#' plot(
+#'   x, show_conf = TRUE, panel_size = c(1.5, 1.5, 1), layout = 'unified',
+#'   left_panel = list(HR = x$cleanfp_list$numeric$`exp(coef)`)
+#' )
+#' 
+#' plot(
+#'   x, show_conf = TRUE, panel_size = c(2, 1.5, 1), layout = 'unified',
+#'   left_panel = list(
+#'     HR = x$cleanfp_list$numeric$`exp(coef)`,
+#'     ' ' = ifelse(x$cleanfp_list$numeric$p.value < 0.05, '*', '')
+#'   )
+#' )
+#' 
+#' 
+#' ## use a custom denominator for percents, eg, if the model sample size
+#' ## excludes NAs or missing data
+#' x <- coxph(Surv(time, status) ~ age2 + sex + ph.ecog, lung2)
+#' forest(x, total = nrow(lung2))
 #' ## compare
-#' forest(coxph(Surv(time, status) ~ age2 + sex + ph.ecog, lung2))
+#' forest(x)
 #' 
 #' 
 #' ## equivalent ways to make forest plot
@@ -92,20 +106,40 @@
 #' 
 #' 
 #' ## plot.forest gives more options
-#' plot(prep_list, xlim = c(0, 2.5),
-#'      center_panel = {
-#'        panel_box(replicate(6, runif(20, 0, 2), simplify = FALSE))
-#'        axis(1, mgp = c(3, 2, 1))
-#'      })
+#' plot(
+#'   prep_list,
+#'   xlim = c(0, 2),
+#'   center_panel = {
+#'     panel_box(replicate(6, runif(20, 0, 2), simplify = FALSE))
+#'     axis(1, mgp = c(3, 2, 1))
+#'   }
+#' )
+#' 
+#' \dontrun{
+#' library('rawr') ## for tplot
+#' hr_ci <- prep_list$cleanfp_list$numeric[1:3]
+#' plot(
+#'   prep_list,
+#'   xlim = c(0, 4),
+#'   center_panel = {
+#'     panel_tplot(rev(asplit(hr_ci, 1)), type = 'd', cex = 3,
+#'                 pch = c(16, 1, 1), group.pch = FALSE,
+#'                 col = c(1, 2, 2), group.col = FALSE)
+#'     axis(1, mgp = c(3, 2, 1))
+#'   }
+#' )
+#' }
 #' 
 #' 
+#' ## use forest(..., plot = FALSE) to run steps except plotting which
+#' ## can then be customized with plot.forest
 #' fp <- forest(glm(vs ~ factor(gear) + wt + hp, mtcars,
 #'                  family = 'binomial'),
 #'              plot = FALSE)
 #' plot(fp, labels = c(paste('Gear -', 3:5), 'Weight (1k lbs)', 'Horse Power'))
 #' 
 #' 
-#' ## multiple models
+#' ## multiple models on the same plot
 #' cx1 <- coxph(Surv(time, status) ~ age + sex + ph.ecog, lung2)
 #' cx2 <- coxph(Surv(time, status) ~ age + sex, lung2)
 #' cx3 <- coxph(Surv(time, status) ~ age, lung2)
@@ -118,10 +152,15 @@
 #' 
 #' group.col <- rep_len(c('grey95', 'none'), length(models))
 #' group.col <- rep(group.col, sapply(prep_lists, function(x) length(x$Term)))
-#' plot(x, col.rows = group.col)
+#' plot(x, col.rows = group.col, reset_par = FALSE)
+#' rl <- rev(rle(group.col)$lengths)
+#' text(grconvertX(0.025, 'ndc'), rev(cumsum(head(c(0, rl), -1)) + rl / 2),
+#'      paste('Model', 1:3), xpd = NA, srt = 90, adj = 0)
 #' 
 #' 
-#' ## competing risks regression
+#' ## other supported objects
+#' 
+#' ## competing risks regressions
 #' library('cmprsk')
 #' x <- with(transplant,
 #'   crr(futime, as.integer(event) - 1,
@@ -131,7 +170,6 @@
 #' library('cmprsk2')
 #' x <- crr2(Surv(futime, event(censored) == death) ~ age + sex + abo, transplant)
 #' forest(x)
-#' 
 #' 
 #' ## cox models
 #' dat <- within(na.omit(transplant), {
@@ -148,6 +186,18 @@
 #' library('coxphf')
 #' x <- coxphf(Surv(futime, event_ind) ~ age + sex + abo, dat)
 #' forest(x, data = dat)
+#' 
+#' ## odds ratios/fisher tests
+#' dat <- data.frame(
+#'   group = c('tx', 'pbo'),
+#'   mut = replicate(10, sample(0:1, 50, replace = TRUE))
+#' )
+#' names(dat)[-1] <- paste0('gene', 1:10)
+#' 
+#' forest(
+#'   group ~ ., dat,
+#'   plotArgs = list(xlim = c(0, 20), show_conf = TRUE, cex = 1)
+#' )
 #' 
 #' @export
 
@@ -274,7 +324,10 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8), col.rows, at.text = NULL
   ) -> at
   vtext(
     unique(at$x), max(at$y) + rep_len(1L, length(lp)),
-    col = replace(palette()[c(1, 1)], !show_columns[1:2], 'transparent'),
+    col = rep_len(
+      replace(palette()[c(1, 1)], !show_columns[1:2], 'transparent'),
+      length(unique(at$x))
+    ),
     names[nlp] %||% names(lp), font = 2, xpd = NA, adj = adj
   )
   
