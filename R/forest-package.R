@@ -26,7 +26,6 @@
 #' forest(mpg ~ ., twos)
 #' forest(mpg ~ ., twos, plotArgs = list(xlim = c(0, 20), show_conf = TRUE))
 #' 
-#' 
 #' @name forest-package
 #' @docType package
 NULL

@@ -203,9 +203,7 @@ panel_tplot <- function(data, y = seq.int(length(data)), col = 1L,
                         axes = FALSE, logx = FALSE, add = TRUE,
                         panel.first = NULL, panel.last = NULL,
                         ...) {
-  stopifnot(
-    is.list(data)
-  )
+  stopifnot(is.list(data))
   
   args <- alist(
     x = as.list(data), horizontal = TRUE, at = y, axes = axes,
@@ -214,7 +212,7 @@ panel_tplot <- function(data, y = seq.int(length(data)), col = 1L,
     log = ifelse(logx, 'x', '')
   )
   
-  do.call('tplot', c(args, ...))
+  do.call('tplot', modifyList(args, list(...)))
   
   invisible(NULL)
 }

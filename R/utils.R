@@ -27,11 +27,11 @@ add_reference <- function(x, header = FALSE, keep_strata = FALSE, total = NULL) 
   suf  <- c('', '.L', '.Q', '.C',
             sprintf('^%s', seq.int(pmax(4L, nrow(mf)))))
   
-  nn <- lapply(seq_along(nums)[-1L], function(x)
-    paste0(names(nums)[x],
-           if (ord[x] & grepl('poly', getOption('contrasts')[2L]))
-             suf[seq.int(length(nums[[x]]) - 0L)]
-           else names(nums[[x]]) %||% ''))
+  nn <- lapply(seq_along(nums)[-1L], function(ii)
+    paste0(names(nums)[ii],
+           if (ord[ii] & grepl('poly', getOption('contrasts')[2L]))
+             suf[seq.int(length(nums[[ii]]) - 0L)]
+           else names(nums[[ii]]) %||% ''))
   rn <- unlist(nn)
   
   ## create matrix with reference groups to merge

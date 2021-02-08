@@ -32,5 +32,4 @@ twos[] <- lapply(twos, function(x) +grepl('1|4', x))
 forest(mpg ~ ., twos)
 forest(mpg ~ ., twos, plotArgs = list(xlim = c(0, 20), show_conf = TRUE))
 
-
 }
