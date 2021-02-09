@@ -51,9 +51,9 @@
 #' @examples
 #' library('survival')
 #' lung2 <- within(lung, {
-#'   sex <- factor(sex, 1:2, c('Male','Female'))
+#'   sex <- factor(sex, 1:2, c('Male', 'Female'))
 #'   ph.ecog <- factor(ph.ecog, 0:2)
-#'   age2 <- replace(age, sample(nrow(lung), 50), NA)
+#'   age2 <- replace(age, sample(length(age), 50), NA)
 #' })
 #' 
 #' x <- coxph(Surv(time, status) ~ age + sex + ph.ecog +
@@ -154,7 +154,7 @@
 #' group.col <- rep(group.col, sapply(prep_lists, function(x) length(x$Term)))
 #' plot(x, col.rows = group.col, reset_par = FALSE)
 #' rl <- rev(rle(group.col)$lengths)
-#' text(grconvertX(0.025, 'ndc'), rev(cumsum(head(c(0, rl), -1)) + rl / 2),
+#' text(grconvertX(0.025, 'ndc'), rev(cumsum(head(c(0, rl), -1)) + rl / 2) + 0.5,
 #'      paste('Model', 1:3), xpd = NA, srt = 90, adj = 0)
 #' 
 #' 
@@ -374,8 +374,7 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8), col.rows, at.text = NULL
   
   ## get xlim if given, force min at 0
   xlim <- xlim %||% c(0, max(rn))
-  xlim[1L] <- if (logx)
-    1 else 0
+  # xlim[1L] <- if (logx) 1 else 0
   # xlim[1L] <- 0 + pmin(0.1, min(unlist(nn), na.rm = TRUE) * logx)
   
   if (layout == 'split')
@@ -393,7 +392,7 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8), col.rows, at.text = NULL
   plot.new()
   plot.window(xlim, range(lx))
   
-  if (missing(center_panel)) {
+  if (is.null(center_panel)) {
     panel_fn(nn, yy, type = 'n', xlim = xlim, logx = logx, col = col, ...)
     axis(1L, pos = lims$y[1L])
   } else eval(center_panel)

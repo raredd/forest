@@ -93,9 +93,9 @@ A forest plot.
 \examples{
 library('survival')
 lung2 <- within(lung, {
-  sex <- factor(sex, 1:2, c('Male','Female'))
+  sex <- factor(sex, 1:2, c('Male', 'Female'))
   ph.ecog <- factor(ph.ecog, 0:2)
-  age2 <- replace(age, sample(nrow(lung), 50), NA)
+  age2 <- replace(age, sample(length(age), 50), NA)
 })
 
 x <- coxph(Surv(time, status) ~ age + sex + ph.ecog +
@@ -196,7 +196,7 @@ group.col <- rep_len(c('grey95', 'none'), length(models))
 group.col <- rep(group.col, sapply(prep_lists, function(x) length(x$Term)))
 plot(x, col.rows = group.col, reset_par = FALSE)
 rl <- rev(rle(group.col)$lengths)
-text(grconvertX(0.025, 'ndc'), rev(cumsum(head(c(0, rl), -1)) + rl / 2),
+text(grconvertX(0.025, 'ndc'), rev(cumsum(head(c(0, rl), -1)) + rl / 2) + 0.5,
      paste('Model', 1:3), xpd = NA, srt = 90, adj = 0)
 
 
