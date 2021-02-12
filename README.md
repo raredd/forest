@@ -13,15 +13,15 @@ devtools::install_github('raredd/forest')
 
 ## Basic usage and supported models/objects
 
-| object               | package      |
-| :------------------- | :----------- |
-| <code>coxph</code>   | **survival** |
-| <code>coxphf</code>  | **coxphf**   |
-| <code>crr</code>     | **cmprsk**   |
-| <code>crr2</code>    | **cmprsk2**  |
-| <code>formula</code> | **stats**    |
-| <code>glm</code>     | **stats**    |
-| <code>logistf</code> | **logistf**  |
+| object               | package                                                          |
+| :------------------- | :--------------------------------------------------------------- |
+| <code>coxph</code>   | **[survival](https://cran.r-project.org/web/packages/survival)** |
+| <code>coxphf</code>  | **[coxphf](https://cran.r-project.org/web/packages/coxphf)**     |
+| <code>crr</code>     | **[cmprsk](https://cran.r-project.org/web/packages/cmprsk)**     |
+| <code>crr2</code>    | **[cmprsk2](https://github.com/raredd/cmprsk2)**                 |
+| <code>formula</code> | **stats**                                                        |
+| <code>glm</code>     | **stats**                                                        |
+| <code>logistf</code> | **[logistf](https://cran.r-project.org/web/packages/logistf)**   |
 
 ``` r
 library('survival')
@@ -90,6 +90,7 @@ box('outer')
 ## Panel options
 
 ``` r
+set.seed(1)
 x <- forest(
   coxph(Surv(time, status) ~ I(age / 10) + sex + ph.ecog, lung2),
   plot = FALSE
@@ -138,7 +139,7 @@ box('outer')
 ## Session info
 
 ``` r
-within.list(sessionInfo(), loaded <- NULL)
+within.list(sessionInfo(), loadedOnly <- NULL)
 ```
 
     ## R version 4.0.2 (2020-06-22)
@@ -157,10 +158,3 @@ within.list(sessionInfo(), loaded <- NULL)
     ## 
     ## other attached packages:
     ## [1] rawr_0.9.2        survival_3.2-7    knitr_1.31        forest_0.0.0.9000
-    ## 
-    ## loaded via a namespace (and not attached):
-    ##  [1] lattice_0.20-41   digest_0.6.27     grid_4.0.2        magrittr_2.0.1   
-    ##  [5] evaluate_0.14     highr_0.8         rlang_0.4.10      stringi_1.5.3    
-    ##  [9] Matrix_1.3-2      rmarkdown_2.6     splines_4.0.2     tools_4.0.2      
-    ## [13] stringr_1.4.0     xfun_0.20         yaml_2.2.1        compiler_4.0.2   
-    ## [17] htmltools_0.5.1.1

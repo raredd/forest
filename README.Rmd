@@ -39,8 +39,15 @@ devtools::install_github('raredd/forest')
 ## Basic usage and supported models/objects
 
 ```{r, echo=FALSE}
-x <- c(survival = 'coxph', coxphf = 'coxphf', cmprsk = 'crr', cmprsk2 = 'crr2',
-       stats = 'formula', stats = 'glm', logistf = 'logistf')
+x <- c(
+  '[survival](https://cran.r-project.org/web/packages/survival)' = 'coxph',
+  '[coxphf](https://cran.r-project.org/web/packages/coxphf)' = 'coxphf',
+  '[cmprsk](https://cran.r-project.org/web/packages/cmprsk)' = 'crr',
+  '[cmprsk2](https://github.com/raredd/cmprsk2)' = 'crr2',
+  stats = 'formula',
+  stats = 'glm',
+  '[logistf](https://cran.r-project.org/web/packages/logistf)' = 'logistf'
+)
 
 knitr::kable(
   data.frame(
@@ -111,6 +118,7 @@ box('outer')
 ## Panel options
 
 ```{r panel, fig.width=10}
+set.seed(1)
 x <- forest(
   coxph(Surv(time, status) ~ I(age / 10) + sex + ph.ecog, lung2),
   plot = FALSE
@@ -155,5 +163,5 @@ box('outer')
 ## Session info
 
 ```{r}
-within.list(sessionInfo(), loaded <- NULL)
+within.list(sessionInfo(), loadedOnly <- NULL)
 ```
