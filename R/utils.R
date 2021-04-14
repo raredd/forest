@@ -6,6 +6,20 @@
 ###
 
 
+#' Forest utilities
+#' 
+#' Not recommended to be called by the user.
+#' 
+#' @param x,y objects
+#' @param header a character vector of header labels
+#' @param keep_strata logical; if \code{FALSE} (default), strata variables,
+#' e.g., \code{y ~ strata(a) + b} will be ignored
+#' @param total optional total sample size, useful if model excludes
+#' observations with missing data
+#' 
+#' @name forest_utils
+
+#' @rdname forest_utils
 #' @export
 add_reference <- function(x, header = FALSE, keep_strata = FALSE, total = NULL) {
   assert_class(x, 'cleanfp')
@@ -89,6 +103,7 @@ get_n <- function(x, percent = FALSE, total = NULL) {
     n / total else n
 }
 
+#' @rdname forest_utils
 #' @export
 merge_forest <- function(x, y) {
   assert_class(x, 'cleanfp_list')
@@ -105,6 +120,7 @@ merge_forest <- function(x, y) {
   )
 }
 
+#' @rdname forest_utils
 #' @export
 prepare_forest <- function(x) {
   assert_class(x, 'cleanfp_ref')

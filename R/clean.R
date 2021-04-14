@@ -10,26 +10,51 @@
 ###
 
 
+#' Clean objects for forest
+#' 
+#' Methods to handle cleaning of objects supported by \code{forest}.
+#' 
+#' @param x an object or formula
+#' @param ... additional arguments passed to or from other methods
+#' @param exp logical; if \code{TRUE}, estimates will be exponentiated
+#' @param conf.int the confidence level
+#' @param digits the number of digits past the decimal to keep
+#' @param format_pval logical or a function used to format p-values to
+#' character strings
+#' @param formula a formula
+#' @param data a data frame with variables in \code{formula} and/or
+#' used to fit \code{x}
+#' @param which for \code{\link[cmprsk2]{crr2}} objects, the index of \code{x}
+#' that will be plotted (default is \code{x[[1]]})
+#' @param order variable used to order the results, one of \code{"p.value"},
+#' \code{"coef"}, or \code{"none"} for no re-ordering
+#' @param decreasing logical; if \code{TRUE}, results are sorted by
+#' \code{order} in decreasing order
+#' 
+#' @export
+
+cleanfp <- function(x, ...) {
+  UseMethod('cleanfp')
+}
+
+#' @rdname cleanfp
 #' @export
 print.cleanfp <- function(x, ...) {
   print(x$cleanfp)
   invisible(x)
 }
 
-#' @export
-cleanfp <- function(x, ...) {
-  UseMethod('cleanfp')
-}
-
+#' @rdname cleanfp
 #' @export
 cleanfp.default <- function(x, ...) {
   message('Objects of class ', toString(class(x)), ' are not supported')
   invisible(x)
 }
 
+#' @rdname cleanfp
 #' @export
 cleanfp.coxph <- function(x, exp = TRUE, conf.int = 0.95,
-                          digits = 2L, format_pval = TRUE) {
+                          digits = 2L, format_pval = TRUE, ...) {
   assert_class(x, 'coxph')
   ss <- summary(x)
   co <- ss$coefficients
@@ -56,9 +81,10 @@ cleanfp.coxph <- function(x, exp = TRUE, conf.int = 0.95,
   )
 }
 
+#' @rdname cleanfp
 #' @export
 cleanfp.crr <- function(x, formula, data, exp = TRUE, conf.int = 0.95,
-                        digits = 2L, format_pval = TRUE) {
+                        digits = 2L, format_pval = TRUE, ...) {
   assert_class(x, 'crr')
   ss <- summary(x)
   co <- ss$coef
@@ -93,9 +119,10 @@ cleanfp.crr <- function(x, formula, data, exp = TRUE, conf.int = 0.95,
   )
 }
 
+#' @rdname cleanfp
 #' @export
 cleanfp.crr2 <- function(x, which = 1L, exp = TRUE, conf.int = 0.95,
-                         digits = 2L, format_pval = TRUE) {
+                         digits = 2L, format_pval = TRUE, ...) {
   x <- if (any(class(x) %in% 'crr2_list'))
     x[[which]] else {
       assert_class(x, c('crr2', 'crr'))
@@ -107,10 +134,11 @@ cleanfp.crr2 <- function(x, which = 1L, exp = TRUE, conf.int = 0.95,
           mf, exp, conf.int, digits, format_pval)
 }
 
+#' @rdname cleanfp
 #' @export
 cleanfp.coxphf <- function(x, formula = x$call$formula, data,
                            exp = TRUE, conf.int = 1 - x$alpha, digits = 2L,
-                           format_pval = TRUE) {
+                           format_pval = TRUE, ...) {
   assert_class(x, c('coxph', 'coxphf'))
   
   capture.output(ss <- summary(x))
@@ -150,9 +178,11 @@ cleanfp.coxphf <- function(x, formula = x$call$formula, data,
 # x <- prepare_forest(x)
 # plot(x)
 
+#' @rdname cleanfp
 #' @export
-cleanfp.logistf <- function(x, exp = TRUE, conf.int = 1 - x$alpha,
-                            digits = 2L, format_pval = TRUE) {
+cleanfp.logistf <- function(x, formula = x$call$formula, data,
+                            exp = TRUE, conf.int = 1 - x$alpha, digits = 2L,
+                            format_pval = TRUE, ...) {
   assert_class(x, 'logistf')
   
   capture.output(
@@ -179,7 +209,7 @@ cleanfp.logistf <- function(x, exp = TRUE, conf.int = 1 - x$alpha,
   
   structure(
     list(cleanfp = res, object = x,
-         model.frame = model.frame(x$formula, x$data)),
+         model.frame = model.frame(formula, data)),
     class = 'cleanfp'
   )
 }
@@ -193,9 +223,10 @@ cleanfp.logistf <- function(x, exp = TRUE, conf.int = 1 - x$alpha,
 # x <- prepare_forest(x)
 # plot(x)
 
+#' @rdname cleanfp
 #' @export
 cleanfp.glm <- function(x, exp = TRUE, conf.int = 0.95,
-                        digits = 2L, format_pval = TRUE) {
+                        digits = 2L, format_pval = TRUE, ...) {
   assert_class(x, 'glm')
   stopifnot(x$family$family == 'binomial')
   
@@ -233,6 +264,7 @@ cleanfp.glm <- function(x, exp = TRUE, conf.int = 0.95,
 # f <- fisher.test(x)
 # cleanfp(x)
 
+#' @rdname cleanfp
 #' @export
 cleanfp.table <- function(x, conf.int = 0.95, digits = 2L,
                           format_pval = TRUE, ...) {
@@ -260,6 +292,7 @@ cleanfp.table <- function(x, conf.int = 0.95, digits = 2L,
 # forest(formula(x), x)
 # cleanfp(formula(x), x)
 
+#' @rdname cleanfp
 #' @export
 cleanfp.formula <- function(formula = formula(data), data, conf.int = 0.95,
                             digits = 2L, format_pval = TRUE,

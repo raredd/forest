@@ -31,8 +31,8 @@ forest(x, ..., header = FALSE, total = NULL, plotArgs = list(), plot = TRUE)
 )
 }
 \arguments{
-\item{x}{an object returned by \code{\link{prepare_list}} or an object of
-a supported class}
+\item{x}{an object returned by \code{\link{prepare_forest}} or an object
+of a supported class}
 
 \item{...}{additional arguments passed to other methods or graphical
 parameters passed to \code{\link{par}}}
@@ -54,6 +54,12 @@ a list of data to plot is returned (see \code{plot.forest})}
 \item{panel_size}{proportional size of \code{c(left, middle, right)} panels}
 
 \item{col.rows}{optional vector of colors for each row}
+
+\item{at.text}{optional x-axis locations for the text columns in normalized
+device coordinates; see \code{\link{grconvertX}}}
+
+\item{left_panel}{(dev) a \code{emph} named list of additional text columns
+added to the left panel}
 
 \item{center_panel}{(dev) optional function used to draw the plot}
 
@@ -213,6 +219,7 @@ library('cmprsk2')
 x <- crr2(Surv(futime, event(censored) == death) ~ age + sex + abo, transplant)
 forest(x)
 
+
 ## cox models
 dat <- within(na.omit(transplant), {
   event_ind <- +(event == 'death')
@@ -224,10 +231,18 @@ x <- coxph(Surv(futime, event_ind) ~ age + sex + abo, dat)
 x <- forest(x, plot = FALSE)
 plot(x, show_conf = TRUE, xlim = c(0, 5))
 
+
 ## coxphf::coxphf model
 library('coxphf')
 x <- coxphf(Surv(futime, event_ind) ~ age + sex + abo, dat)
 forest(x, data = dat)
+
+
+## logistf::logistf model
+library('logistf')
+x <- logistf(event_ind ~ age + sex + abo, dat)
+forest(x, data = dat)
+
 
 ## odds ratios/fisher tests
 dat <- data.frame(

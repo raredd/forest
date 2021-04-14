@@ -8,9 +8,11 @@
     tryCatch(find.package(x), error = function(e) invisible(TRUE))
   
   if (isTRUE(ok('rawr')))
-    packageStartupMessage("\'rawr\' package may be needed:\n\n",
-                          "run devtools::install_github('raredd/rawr')",
-                          domain = NA)
+    packageStartupMessage(
+      "\'rawr\' package may be needed:\n\n",
+      "run devtools::install_github('raredd/rawr')",
+      domain = NA
+    )
   
   invisible(NULL)
 }

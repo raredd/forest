@@ -9,7 +9,7 @@
 #' from the \pkg{survival} package \cr
 #' \tab \code{\link[coxphf]{coxphf}} \tab Cox regression with Firth's penalized
 #' likelihood from the \pkg{coxphf} package \cr
-#' \tab \code{\link[cmprks]{crr}} \tab Competing risks regression from the
+#' \tab \code{\link[cmprsk]{crr}} \tab Competing risks regression from the
 #' \pkg{cmprsk} package \cr
 #' \tab \code{\link[cmprsk2]{crr2}} \tab Competing risks regression from the
 #' \pkg{cmprsk2} package \cr
@@ -26,6 +26,7 @@
 #' forest(mpg ~ ., twos)
 #' forest(mpg ~ ., twos, plotArgs = list(xlim = c(0, 20), show_conf = TRUE))
 #' 
+#' @import graphics grDevices stats utils
 #' @name forest-package
 #' @docType package
 NULL

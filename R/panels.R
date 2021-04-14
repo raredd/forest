@@ -50,7 +50,7 @@ panel_box <- function(data, y = seq.int(length(data)),
   
   if (!add) {
     plot.new()
-    plot.window(extendrange(unlist(l)), ylim)
+    plot.window(extendrange(unlist(data)), ylim)
   }
   
   panel.first

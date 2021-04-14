@@ -1,28 +1,23 @@
-<!--
-%\VignetteEngine{knitr::knitr}
-%\VignetteIndexEntry{Interactive plots in R}
--->
-
-## forest
- 
-* [intro](#intro)  
-* [design](#design)  
-* [examples](#examples)  
+---
+title: "forest - intro"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{forest - intro}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
 
 ```{r, include=FALSE}
+library('forest')
 library('knitr')
 knitr::opts_chunk$set(
-  fig.width = 8, fig.height = 6, message = FALSE, eval = FALSE
+  fig.width = 8, fig.height = 6, message = FALSE, eval = TRUE
 )
 ```
 
 ## intro
-
-```{r}
-library('forest')
-```
-
-## design
 
 ```{r}
 library('survival')
@@ -55,6 +50,8 @@ forest(mod, plotArgs = list(show_conf = TRUE, xlim = c(0, 2)))
 
 ### `coxphf::coxphf`
 
+Note: add the data argument
+
 ```{r}
 library('coxphf')
 mod <- coxphf(Surv(time, status) ~ age + factor(sex) + rx, colon)
@@ -71,14 +68,18 @@ forest(mod, plotArgs = list(show_conf = TRUE))
 
 ### `logistf::logistf`
 
+Note: add the data argument
+
 ```{r}
 library('logistf')
 mod <- logistf(vs ~ factor(gear) + factor(am), mtcars)
-forest(mod)
-forest(mod, plotArgs = list(show_conf = TRUE, logx = TRUE))
+forest(mod, data = mtcars)
+forest(mod, data = mtcars, plotArgs = list(show_conf = TRUE, logx = TRUE))
 ```
 
 ### `stats::fisher.test`
+
+Note: add the data argument
 
 ```{r}
 mod <- mtcars
@@ -88,11 +89,14 @@ forest(mpg ~ ., mod, plotArgs = list(xlim = c(0, 20), show_conf = TRUE))
 
 ### `cmprsk::crr`
 
+Note: add the formula and data arguments.
+
 ```{r}
 library('cmprsk')
-mod <- with(transplant,
-            crr(futime, as.integer(event) - 1,
-                cov1 = cbind(age, model.matrix(~ sex + abo)[, -1, drop = FALSE])))
+mod <- with(transplant, {
+  crr(futime, as.integer(event) - 1,
+      cov1 = cbind(age, model.matrix(~ sex + abo)[, -1, drop = FALSE]))
+})
 forest(mod, ~ age + sex + abo, transplant)
 ```
 
@@ -101,18 +105,18 @@ forest(mod, ~ age + sex + abo, transplant)
 ```{r}
 library('cmprsk2')
 mod <- crr2(Surv(futime, event(censored) == death) ~ age + sex + abo, transplant)
-forest(mod, header = c('Age at dx', 'Blood type'))
+forest(mod, header = c('Age at dx', 'Sex', 'Blood type'))
 ```
 
-### install
+## install
 
 ```{r, eval=FALSE}
 # install.packages('devtools')
 devtools::install_github('raredd/forest', build_vignettes = TRUE)
 ```
 
-### session
+## session
 
 ```{r, eval=TRUE}
-utils::sessionInfo()
+within.list(utils::sessionInfo(), loadedOnly <- NULL)
 ```

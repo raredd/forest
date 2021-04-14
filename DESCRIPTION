@@ -7,7 +7,20 @@ Authors@R: person("Robert", "Redd", email = "raredd01@gmail.com",
 Author: Robert Redd
 Maintainer: Robert Redd <raredd01@gmail.com>
 Description: Forest plots.
+Imports:
+    graphics,
+    grDevices,
+    stats,
+    utils
 Suggests:
+    coxphf,
+    cmprsk,
+    cmprsk2,
+    knitr,
+    logistf,
+    MASS,
+    rawr,
+    survival,
     testthat
 License: GPL-2
 LazyData: yes
