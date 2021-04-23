@@ -1,5 +1,5 @@
 ### forest plot
-# forest
+# forest, forest2
 # 
 # S3 methods: plot
 # plot.forest
@@ -14,6 +14,10 @@
 #' 
 #' @param x an object returned by \code{\link{prepare_forest}} or an object
 #' of a supported class
+#' 
+#' for \code{forest2}, a (named) list of models to be passed to \code{forest}
+#' and aggregated for a single plot
+#' 
 #' @param ... additional arguments passed to other methods or graphical
 #' parameters passed to \code{\link{par}}
 #' @param header logical or a vector of character strings used as labels for
@@ -49,6 +53,10 @@
 #' @param reset_par logical; if \code{TRUE}, the graphical parameters are
 #' reset to their state before the function call; use \code{FALSE} to
 #' continue adding to the middle panel figure
+#' @param panel.first an expression to be evaluated after the plotting window
+#' has been set up but before any plotting takes place
+#' @param panel.last an expression to be evaluated after plotting has taken
+#' place but before exiting the function
 #' @param layout layout of figure, either \code{"split"} where plot splits
 #' the text columns or \code{"unified"} where the text columns are adjacent
 #' 
@@ -165,9 +173,12 @@
 #' text(grconvertX(0.025, 'ndc'), yy, names(models),
 #'      xpd = NA, srt = 90, adj = 0.5)
 #' 
+#' ## or simply
+#' forest2(models)
+#' 
 #' 
 #' ## other supported objects:
-#' crr, crr2, coxph, coxphf, logistf, formula
+#' ## crr, crr2, coxph, coxphf, logistf, formula
 #' 
 #' ## competing risks regressions
 #' library('cmprsk')
@@ -231,6 +242,42 @@ forest <- function(x, ..., header = FALSE, total = NULL,
   invisible(x)
 }
 
+#' @param col.group a vector of colors for each model in \code{x}, recycled
+#' as needed
+#' @param groups labels for each model in \code{x}
+#' 
+#' @rdname forest
+#' @export
+forest2 <- function(x, col.group = c('grey95', 'none'),
+                    groups = names(x), panel.last = NULL, ...) {
+  if (!inherits(x, 'list'))
+    return(forest(x, ...))
+  
+  prep_lists <- lapply(x, function(x) {
+    x <- forest(x, plot = FALSE)
+    structure(x[[1L]], class = 'cleanfp_list')
+  })
+  
+  col.group <- rep_len(col.group, length(x))
+  col.group <- rep(col.group, sapply(prep_lists, function(x) length(x$Term)))
+  
+  xx <- Reduce(merge_forest, prep_lists)
+  rl <- rev(rle(col.group)$lengths)
+  yy <- rev(cumsum(head(c(0, rl), -1)) + rl / 2) + 0.5
+  
+  plot(
+    xx, col.rows = col.group, ...,
+    panel.last = {
+      if (!is.null(groups))
+        text(grconvertX(0.025, 'ndc'), yy, groups,
+             xpd = NA, srt = 90, adj = 0.5)
+      panel.last
+    }
+  )
+  
+  invisible(x)
+}
+
 #' @rdname forest
 #' @export
 plot.forest <- function(x, panel_size = c(1, 1.5, 0.8), col.rows, at.text = NULL,
@@ -240,6 +287,7 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8), col.rows, at.text = NULL
                         names = NULL, show_conf = FALSE, labels = NULL,
                         xlim = NULL, axes = TRUE, logx = FALSE,
                         inner.mar = c(0, 0, 0, 0), reset_par = TRUE,
+                        panel.first = NULL, panel.last = NULL,
                         layout = c('split', 'unified'), ...) {
   op <- par(no.readonly = TRUE)
   if (reset_par)
@@ -306,6 +354,8 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8), col.rows, at.text = NULL
   # m <- matrix(c(1,1,1,2,3,4,5,5,5), 3L, byrow = TRUE)
   # layout(m, heights = c(1, 10, 1))
   # plot.null()
+  
+  panel.first
   
   ## base plot
   # plot.null(lx)
@@ -414,6 +464,8 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8), col.rows, at.text = NULL
     panel_fn(nn, yy, type = 'n', xlim = xlim, logx = logx, col = col, ...)
     axis(1L, pos = lims$y[1L])
   } else eval(center_panel)
+  
+  panel.last
   
   invisible(op)
 }

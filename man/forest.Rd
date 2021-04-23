@@ -2,10 +2,19 @@
 % Please edit documentation in R/plot.R
 \name{forest}
 \alias{forest}
+\alias{forest2}
 \alias{plot.forest}
 \title{Forest plot}
 \usage{
 forest(x, ..., header = FALSE, total = NULL, plotArgs = list(), plot = TRUE)
+
+forest2(
+  x,
+  col.group = c("grey95", "none"),
+  groups = names(x),
+  panel.last = NULL,
+  ...
+)
 
 \method{plot}{forest}(
   x,
@@ -26,13 +35,18 @@ forest(x, ..., header = FALSE, total = NULL, plotArgs = list(), plot = TRUE)
   logx = FALSE,
   inner.mar = c(0, 0, 0, 0),
   reset_par = TRUE,
+  panel.first = NULL,
+  panel.last = NULL,
   layout = c("split", "unified"),
   ...
 )
 }
 \arguments{
 \item{x}{an object returned by \code{\link{prepare_forest}} or an object
-of a supported class}
+of a supported class
+
+for \code{forest2}, a (named) list of models to be passed to \code{forest}
+and aggregated for a single plot}
 
 \item{...}{additional arguments passed to other methods or graphical
 parameters passed to \code{\link{par}}}
@@ -50,6 +64,14 @@ observations; see examples}
 
 \item{plot}{logical; if \code{TRUE}, a forest plot is generated; otherwise,
 a list of data to plot is returned (see \code{plot.forest})}
+
+\item{col.group}{a vector of colors for each model in \code{x}, recycled
+as needed}
+
+\item{groups}{labels for each model in \code{x}}
+
+\item{panel.last}{an expression to be evaluated after plotting has taken
+place but before exiting the function}
 
 \item{panel_size}{proportional size of \code{c(left, middle, right)} panels}
 
@@ -89,6 +111,9 @@ show a custom axis, set \code{reset_par = FALSE} and use \code{\link{axis}}}
 \item{reset_par}{logical; if \code{TRUE}, the graphical parameters are
 reset to their state before the function call; use \code{FALSE} to
 continue adding to the middle panel figure}
+
+\item{panel.first}{an expression to be evaluated after the plotting window
+has been set up but before any plotting takes place}
 
 \item{layout}{layout of figure, either \code{"split"} where plot splits
 the text columns or \code{"unified"} where the text columns are adjacent}
@@ -209,9 +234,12 @@ yy <- rev(cumsum(head(c(0, rl), -1)) + rl / 2) + 0.5
 text(grconvertX(0.025, 'ndc'), yy, names(models),
      xpd = NA, srt = 90, adj = 0.5)
 
+## or simply
+forest2(models)
+
 
 ## other supported objects:
-crr, crr2, coxph, coxphf, logistf, formula
+## crr, crr2, coxph, coxphf, logistf, formula
 
 ## competing risks regressions
 library('cmprsk')
