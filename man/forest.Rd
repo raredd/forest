@@ -188,32 +188,37 @@ plot(fp, labels = c(paste('Gear -', 3:5), 'Weight (1k lbs)', 'Horse Power'))
 
 
 ## multiple models on the same plot
-cx1 <- coxph(Surv(time, status) ~ age + sex + ph.ecog, lung2)
-cx2 <- coxph(Surv(time, status) ~ age + sex, lung2)
-cx3 <- coxph(Surv(time, status) ~ age, lung2)
+models <- list(
+  'Model 1' = coxph(Surv(time, status) ~ age + sex + ph.ecog, lung2),
+  'Model 2' = coxph(Surv(time, status) ~ age + sex, lung2),
+  'Model 3' = coxph(Surv(time, status) ~ age, lung2)
+)
 
-models <- list(cx1, cx2, cx3)
-prep_lists <- lapply(models, forest, plot = FALSE)
-prep_lists <- lapply(prep_lists, function(x)
-  `class<-`(x[[1L]], 'cleanfp_list'))
-x <- Reduce(merge_forest, prep_lists)
+prep_lists <- lapply(models, function(x) {
+  x <- forest(x, plot = FALSE)
+  structure(x[[1L]], class = 'cleanfp_list')
+})
 
 group.col <- rep_len(c('grey95', 'none'), length(models))
 group.col <- rep(group.col, sapply(prep_lists, function(x) length(x$Term)))
+
+x <- Reduce(merge_forest, prep_lists)
 plot(x, col.rows = group.col, reset_par = FALSE)
 rl <- rev(rle(group.col)$lengths)
-text(grconvertX(0.025, 'ndc'), rev(cumsum(head(c(0, rl), -1)) + rl / 2) + 0.5,
-     paste('Model', 1:3), xpd = NA, srt = 90, adj = 0)
+yy <- rev(cumsum(head(c(0, rl), -1)) + rl / 2) + 0.5
+text(grconvertX(0.025, 'ndc'), yy, names(models),
+     xpd = NA, srt = 90, adj = 0.5)
 
 
-## other supported objects
+## other supported objects:
+crr, crr2, coxph, coxphf, logistf, formula
 
 ## competing risks regressions
 library('cmprsk')
 x <- with(transplant,
   crr(futime, as.integer(event) - 1,
       cov1 = cbind(age, model.matrix(~ sex + abo)[, -1, drop = FALSE])))
-forest(x, ~ age + sex + abo, transplant)
+forest(x, ~ age + sex + abo, data = transplant)
 
 library('cmprsk2')
 x <- crr2(Surv(futime, event(censored) == death) ~ age + sex + abo, transplant)

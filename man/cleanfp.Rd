@@ -111,3 +111,6 @@ that will be plotted (default is \code{x[[1]]})}
 \description{
 Methods to handle cleaning of objects supported by \code{forest}.
 }
+\seealso{
+see \code{\link{forest}} for examples
+}

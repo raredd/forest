@@ -31,6 +31,9 @@
 #' @param decreasing logical; if \code{TRUE}, results are sorted by
 #' \code{order} in decreasing order
 #' 
+#' @seealso
+#' see \code{\link{forest}} for examples
+#' 
 #' @export
 
 cleanfp <- function(x, ...) {
@@ -170,14 +173,6 @@ cleanfp.coxphf <- function(x, formula = x$call$formula, data,
   )
 }
 
-# library('logistf')
-# x <- logistf(vs ~ factor(gear) + wt + factor(am), mtcars)
-# # forest(x)
-# x <- cleanfp(x)
-# x <- add_reference(x)
-# x <- prepare_forest(x)
-# plot(x)
-
 #' @rdname cleanfp
 #' @export
 cleanfp.logistf <- function(x, formula = x$call$formula, data,
@@ -213,15 +208,6 @@ cleanfp.logistf <- function(x, formula = x$call$formula, data,
     class = 'cleanfp'
   )
 }
-
-# ## logistic
-# x <- glm(vs ~ factor(gear) + wt, mtcars, family = 'binomial')
-# forest(x)
-# 
-# x <- cleanfp(x)
-# x <- add_reference(x)
-# x <- prepare_forest(x)
-# plot(x)
 
 #' @rdname cleanfp
 #' @export
@@ -260,10 +246,6 @@ cleanfp.glm <- function(x, exp = TRUE, conf.int = 0.95,
   )
 }
 
-# x <- table(mtcars$vs, mtcars$am)
-# f <- fisher.test(x)
-# cleanfp(x)
-
 #' @rdname cleanfp
 #' @export
 cleanfp.table <- function(x, conf.int = 0.95, digits = 2L,
@@ -284,13 +266,6 @@ cleanfp.table <- function(x, conf.int = 0.95, digits = 2L,
     class = c('forest', 'cleanfp')
   )
 }
-
-
-# set.seed(1)
-# x <- data.frame(lapply(1:20, function(x) sample(c(0:1, NA), 20, TRUE)))
-# names(x) <- letters[seq.int(ncol(x))]
-# forest(formula(x), x)
-# cleanfp(formula(x), x)
 
 #' @rdname cleanfp
 #' @export
