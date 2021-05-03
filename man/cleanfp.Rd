@@ -100,7 +100,7 @@ character strings}
 used to fit \code{x}}
 
 \item{which}{for \code{\link[cmprsk2]{crr2}} objects, the index of \code{x}
-that will be plotted (default is \code{x[[1]]})}
+that will be plotted (default is \code{1}, i.e., \code{x[[1]]})}
 
 \item{order}{variable used to order the results, one of \code{"p.value"},
 \code{"coef"}, or \code{"none"} for no re-ordering}

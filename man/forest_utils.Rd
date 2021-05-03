@@ -16,7 +16,8 @@ prepare_forest(x)
 \arguments{
 \item{x, y}{objects}
 
-\item{header}{a character vector of header labels}
+\item{header}{a character vector of header labels for each variable in
+the model}
 
 \item{keep_strata}{logical; if \code{FALSE} (default), strata variables,
 e.g., \code{y ~ strata(a) + b} will be ignored}

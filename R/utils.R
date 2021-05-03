@@ -11,7 +11,8 @@
 #' Not recommended to be called by the user.
 #' 
 #' @param x,y objects
-#' @param header a character vector of header labels
+#' @param header a character vector of header labels for each variable in
+#' the model
 #' @param keep_strata logical; if \code{FALSE} (default), strata variables,
 #' e.g., \code{y ~ strata(a) + b} will be ignored
 #' @param total optional total sample size, useful if model excludes

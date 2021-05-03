@@ -1,5 +1,5 @@
 ### forest plot
-# forest, forest2
+# forest, forest2, plot.forest
 # 
 # S3 methods: plot
 # plot.forest
@@ -10,7 +10,24 @@
 
 #' Forest plot
 #' 
+#' @description
 #' A forest plot.
+#' 
+#' The typical workflow is to create an object (e.g., \code{glm}, \code{coxph},
+#' etc.), clean, and prepare for plot. The final steps may be performed with
+#' \code{forest} or \code{forest2}. However, these are pre-defined workflows
+#' and may not offer the same level of customization as running each step
+#' individually.
+#' 
+#' For the latter case, the following steps should be followed:
+#' \code{\link{cleanfp}}, \code{\link{add_reference}},
+#' \code{\link{prepare_forest}}, and \code{plot.forest}; see help pages for
+#' each step. User-defined may be substituted for any step as long as the
+#' object returned has the proper elements and class.
+#' 
+#' Alternatively, \code{forest(..., plot = FALSE)} will run the preparation
+#' steps and return an object ready for plotting and further customization
+#' with the arguments in \code{plot.forest}.
 #' 
 #' @param x an object returned by \code{\link{prepare_forest}} or an object
 #' of a supported class
@@ -213,7 +230,18 @@
 #' ## logistf::logistf model
 #' library('logistf')
 #' x <- logistf(event_ind ~ age + sex + abo, dat)
-#' forest(x, data = dat)
+#' forest(x, data = dat, plotArgs = list(show_conf = TRUE))
+#' 
+#' 
+#' ## brglm2
+#' library('brglm2')
+#' x <- glm(event_ind ~ age + sex + abo, dat, family = binomial('logit'),
+#'          method = 'brglmFit', type = 'AS_mixed')
+#' forest(x, plotArgs = list(show_conf = TRUE))
+#' 
+#' x <- glm(event_ind ~ age + sex + abo, dat, family = binomial('logit'),
+#'          method = 'brglmFit', type = 'MPL_Jeffreys')
+#' forest(x, plotArgs = list(show_conf = TRUE))
 #' 
 #' 
 #' ## odds ratios/fisher tests

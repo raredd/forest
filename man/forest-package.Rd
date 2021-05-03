@@ -19,10 +19,14 @@ likelihood from the \pkg{coxphf} package \cr
 \pkg{cmprsk} package \cr
 \tab \code{\link[cmprsk2]{crr2}} \tab Competing risks regression from the
 \pkg{cmprsk2} package \cr
-\tab \code{\link{glm}} \tab Logistic regression \cr
+\tab \code{\link{glm}} \tab Logistic regression, i.e., models fit with
+\code{family = binomial(link)} \cr
+\tab \code{\link{glm}} \tab \pkg{brglm2} regression, i.e., models fit with
+\code{family = binomial(link)}, \code{method = 'brglmFit'}, and
+\code{type = ...}; see \code{\link[brglm2]{brglmFit}} \cr
 \tab \code{\link[logistf]{logistf}} \tab Logistic regression with Firth's
 penalized likelihood from the \pkg{logistf} package \cr
-\tab \code{\link{formula}} \tab Fisher's exact tests via
+\tab \code{\link{formula}} \tab Odds ratios and Fisher's exact tests via
 \code{\link{fisher.test}} \cr
 }
 }
@@ -32,4 +36,11 @@ twos[] <- lapply(twos, function(x) +grepl('1|4', x))
 forest(mpg ~ ., twos)
 forest(mpg ~ ., twos, plotArgs = list(xlim = c(0, 20), show_conf = TRUE))
 
+forest(glm(vs ~ wt + mpg + factor(gear), mtcars, family = 'binomial'))
+
+## see ?forest for more examples
+
+}
+\seealso{
+\code{\link{forest}}
 }

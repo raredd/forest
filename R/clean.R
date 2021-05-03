@@ -25,7 +25,7 @@
 #' @param data a data frame with variables in \code{formula} and/or
 #' used to fit \code{x}
 #' @param which for \code{\link[cmprsk2]{crr2}} objects, the index of \code{x}
-#' that will be plotted (default is \code{x[[1]]})
+#' that will be plotted (default is \code{1}, i.e., \code{x[[1]]})
 #' @param order variable used to order the results, one of \code{"p.value"},
 #' \code{"coef"}, or \code{"none"} for no re-ordering
 #' @param decreasing logical; if \code{TRUE}, results are sorted by
