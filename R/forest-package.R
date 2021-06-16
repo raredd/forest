@@ -6,22 +6,22 @@
 #' 
 #' \tabular{rlll}{
 #' \tab \code{\link[survival]{coxph}} \tab Cox proportional hazards regression
-#' from the \pkg{survival} package \cr
+#'   from the \pkg{survival} package \cr
 #' \tab \code{\link[coxphf]{coxphf}} \tab Cox regression with Firth's penalized
-#' likelihood from the \pkg{coxphf} package \cr
+#'   likelihood from the \pkg{coxphf} package \cr
 #' \tab \code{\link[cmprsk]{crr}} \tab Competing risks regression from the
-#' \pkg{cmprsk} package \cr
+#'   \pkg{cmprsk} package \cr
 #' \tab \code{\link[cmprsk2]{crr2}} \tab Competing risks regression from the
-#' \pkg{cmprsk2} package \cr
+#'   \pkg{cmprsk2} package \cr
 #' \tab \code{\link{glm}} \tab Logistic regression, i.e., models fit with
-#' \code{family = binomial(link)} \cr
+#'   \code{family = binomial(link)} \cr
 #' \tab \code{\link{glm}} \tab \pkg{brglm2} regression, i.e., models fit with
-#' \code{family = binomial(link)}, \code{method = 'brglmFit'}, and
-#' \code{type = ...}; see \code{\link[brglm2]{brglmFit}} \cr
+#'   \code{family = binomial(link)}, \code{method = 'brglmFit'}, and
+#'   \code{type = ...}; see \code{\link[brglm2]{brglmFit}} \cr
 #' \tab \code{\link[logistf]{logistf}} \tab Logistic regression with Firth's
-#' penalized likelihood from the \pkg{logistf} package \cr
+#'   penalized likelihood from the \pkg{logistf} package \cr
 #' \tab \code{\link{formula}} \tab Odds ratios and Fisher's exact tests via
-#' \code{\link{fisher.test}} \cr
+#'   \code{\link{fisher.test}} \cr
 #' }
 #' 
 #' @seealso

@@ -317,3 +317,6 @@ forest(
 )
 
 }
+\seealso{
+\code{\link{summary.forest}}
+}

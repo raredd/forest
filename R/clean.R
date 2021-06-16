@@ -20,16 +20,16 @@
 #' @param conf.int the confidence level
 #' @param digits the number of digits past the decimal to keep
 #' @param format_pval logical or a function used to format p-values to
-#' character strings
+#'   character strings
 #' @param formula a formula
 #' @param data a data frame with variables in \code{formula} and/or
-#' used to fit \code{x}
+#'   used to fit \code{x}
 #' @param which for \code{\link[cmprsk2]{crr2}} objects, the index of \code{x}
-#' that will be plotted (default is \code{1}, i.e., \code{x[[1]]})
+#'   that will be plotted (default is \code{1}, i.e., \code{x[[1]]})
 #' @param order variable used to order the results, one of \code{"p.value"},
-#' \code{"coef"}, or \code{"none"} for no re-ordering
+#'   \code{"coef"}, or \code{"none"} for no re-ordering
 #' @param decreasing logical; if \code{TRUE}, results are sorted by
-#' \code{order} in decreasing order
+#'   \code{order} in decreasing order
 #' 
 #' @seealso
 #' see \code{\link{forest}} for examples

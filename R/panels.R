@@ -13,9 +13,9 @@
 #' @param axes logical; if \code{TRUE}, the x-axis is drawn
 #' @param logx logical; if \code{TRUE}, use a logarithmic x-axis
 #' @param add logical; if \code{TRUE}, adds to an existing plot; otherwise, a
-#' new plot is created first
+#'   new plot is created first
 #' @param panel.first,panel.last expressions to be evaluated before and
-#' after any plotting; see \code{\link{plot.default}}
+#'   after any plotting; see \code{\link{plot.default}}
 #' @param ... additional arguments passed to \code{\link{boxplot}}
 #' 
 #' @family panel functions
@@ -69,18 +69,18 @@ panel_box <- function(data, y = seq.int(length(data)),
 #' Panel with points and confidence intervals.
 #' 
 #' @param data a data frame or matrix with three columns containing the
-#' point value, lower limit, and upper limit, respectively
+#'   point value, lower limit, and upper limit, respectively
 #' @param y y-coordinates where each row of \code{data} is plotted
 #' @param col,cex,pch color, size, plotting character for each, recycled as
-#' needed
+#'   needed
 #' @param xlim x-axis limits
 #' @param limits limits for intervals; values outside of \code{limits}
-#' will be truncated and drawn as an arrow
+#'   will be truncated and drawn as an arrow
 #' @param logx logical; if \code{TRUE}, use a logarithmic x-axis
 #' @param panel.first,panel.last expressions to be evaluated before and
-#' after any plotting; see \code{\link{plot.default}}
+#'   after any plotting; see \code{\link{plot.default}}
 #' @param vline x-position of the vertical dashed line; use \code{NA} for
-#' no line
+#'   no line
 #' @param type ignored
 #' @param ... additional arguments passed to \code{\link{plot.default}}
 #' 
@@ -172,9 +172,9 @@ panel_ci <- function(data, y = rev(seq.int(nrow(data))),
 #' @param axes logical; if \code{TRUE}, the x-axis is drawn
 #' @param logx logical; if \code{TRUE}, use a logarithmic x-axis
 #' @param add logical; if \code{TRUE}, adds to an existing plot; otherwise, a
-#' new plot is created first
+#'   new plot is created first
 #' @param panel.first,panel.last expressions to be evaluated before and
-#' after any plotting; see \code{\link{plot.default}}
+#'   after any plotting; see \code{\link{plot.default}}
 #' @param ... additional arguments passed to \code{\link{boxplot}}
 #' 
 #' @family panel functions

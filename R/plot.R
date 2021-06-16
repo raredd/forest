@@ -36,46 +36,49 @@
 #' and aggregated for a single plot
 #' 
 #' @param ... additional arguments passed to other methods or graphical
-#' parameters passed to \code{\link{par}}
+#'   parameters passed to \code{\link{par}}
 #' @param header logical or a vector of character strings used as labels for
-#' each variable in the model
+#'   each variable in the model
 #' @param total optional argument to give total number of observations, useful
-#' for models which have already removed missing observations; by default,
-#' the percentages will be relative to fitted models rather than total
-#' observations; see examples
+#'   for models which have already removed missing observations; by default,
+#'   the percentages will be relative to fitted models rather than total
+#'   observations; see examples
 #' @param plotArgs a named list of additional arguments passed to
-#' \code{plot.forest}
+#'   \code{plot.forest}
 #' @param plot logical; if \code{TRUE}, a forest plot is generated; otherwise,
-#' a list of data to plot is returned (see \code{plot.forest})
+#'   a list of data to plot is returned (see \code{plot.forest})
 #' @param panel_size proportional size of \code{c(left, middle, right)} panels
 #' @param col.rows optional vector of colors for each row
 #' @param at.text optional x-axis locations for the text columns in normalized
-#' device coordinates; see \code{\link{grconvertX}}
+#'   device coordinates; see \code{\link{grconvertX}}
 #' @param left_panel (dev) a \code{emph} named list of additional text columns
-#' added to the left panel
+#'   added to the left panel
 #' @param center_panel (dev) optional function used to draw the plot
 #' @param type type of plot for middle panel (currently only \code{"point"}) is
-#' supported
+#'   supported
 #' @param show_percent logical; if \code{TRUE}, percents are shown for each row
 #' @param show_columns logical or a vector of logicals for each text column
 #' @param names optional vector of length 4 giving the labels for each column
 #' @param show_conf logical; if \code{TRUE}, the confidence interval is show
-#' with the estimate
+#'   with the estimate
 #' @param labels optional vector of labels for each row term
 #' @param xlim the x-axis limits of the plot
 #' @param axes logical; if \code{TRUE}, the x-axis is plotted (default); to
-#' show a custom axis, set \code{reset_par = FALSE} and use \code{\link{axis}}
+#'   show a custom axis, set \code{reset_par = FALSE} and use \code{\link{axis}}
 #' @param logx logical; if \code{TRUE}, the x-axis will be logarithmic
 #' @param inner.mar margins for the plot panel
 #' @param reset_par logical; if \code{TRUE}, the graphical parameters are
-#' reset to their state before the function call; use \code{FALSE} to
-#' continue adding to the middle panel figure
+#'   reset to their state before the function call; use \code{FALSE} to
+#'   continue adding to the middle panel figure
 #' @param panel.first an expression to be evaluated after the plotting window
-#' has been set up but before any plotting takes place
+#'   has been set up but before any plotting takes place
 #' @param panel.last an expression to be evaluated after plotting has taken
-#' place but before exiting the function
+#'   place but before exiting the function
 #' @param layout layout of figure, either \code{"split"} where plot splits
-#' the text columns or \code{"unified"} where the text columns are adjacent
+#'   the text columns or \code{"unified"} where the text columns are adjacent
+#' 
+#' @seealso
+#' \code{\link{summary.forest}}
 #' 
 #' @examples
 #' library('survival')
@@ -271,7 +274,7 @@ forest <- function(x, ..., header = FALSE, total = NULL,
 }
 
 #' @param col.group a vector of colors for each model in \code{x}, recycled
-#' as needed
+#'   as needed
 #' @param groups labels for each model in \code{x}
 #' 
 #' @rdname forest
