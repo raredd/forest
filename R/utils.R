@@ -1,8 +1,8 @@
 ### forest plot utils
 # add_reference, get_n, merge_forest, prepare_forest
 # 
-# S3 methods: print
-# print.forest
+# S3 methods: print, summary
+# print.forest, summary.forest
 ###
 
 
@@ -12,11 +12,11 @@
 #' 
 #' @param x,y objects
 #' @param header a character vector of header labels for each variable in
-#' the model
+#'   the model
 #' @param keep_strata logical; if \code{FALSE} (default), strata variables,
-#' e.g., \code{y ~ strata(a) + b} will be ignored
+#'   e.g., \code{y ~ strata(a) + b} will be ignored
 #' @param total optional total sample size, useful if model excludes
-#' observations with missing data
+#'   observations with missing data
 #' 
 #' @name forest_utils
 
@@ -148,9 +148,55 @@ prepare_forest <- function(x) {
   )
 }
 
+#' @export
 print.forest <- function(x, ...) {
-  if (is.null(x$forest_list))
-    print(x[[1L]]) else print(x)
+  # if (is.null(x$forest_list))
+  #   print(x[[1L]]) else print(x)
+  
+  print(summary(x, html = FALSE))
   
   invisible(x)
+}
+
+#' \code{forest} summary
+#' 
+#' Print a summary of a \code{forest} object.
+#' 
+#' @param object an object of class \code{\link{forest}}
+#' @param html logical; if \code{TRUE}, summary will be formatted for display
+#'   output in html; see examples
+#' @param ... ignored
+#' 
+#' @examples
+#' x <- forest(
+#'   glm(vs ~ factor(gear) + wt + hp, mtcars, family = 'binomial'),
+#'   header = c('Gear', 'Weight', 'Horsepower')
+#' )
+#' summary(x, html = FALSE)
+#' 
+#' \dontrun{
+#' library('htmlTable')
+#' s <- summary(x)
+#' s <- gsub('factor.*\\)', '', s)
+#' htmlTable(s, align = 'lc', caption = 'Model summary.')
+#' }
+#' 
+#' @export
+
+summary.forest <- function(object, html = TRUE, ...) {
+  obj <- object$cleanfp_list
+  txt <- do.call('cbind', obj$text)
+  txt[is.na(txt)] <- ''
+  txt[, 3L] <- apply(txt[, -1L], 1, function(x) paste(x, collapse = ' - '))
+  txt[, 2L] <- sprintf('%s (%s)', obj$N, round(obj$P * 100))
+  txt <- cbind(txt, obj$`p-value`)
+  txt[is.na(txt) | txt == ' - ' | txt == 'NA (NA)'] <- ''
+  term <- gsub('^ +', if (html) '&emsp;' else ' ', obj$Term)
+  colnames(txt) <- c('HR', 'N (%)', '95% CI', 'p-value')
+  txt <- txt[, c(2L, 1L, 3:4)]
+  if (html) {
+    idx <- !grepl('^&em', term)
+    term[idx] <- sprintf('<b>%s</b>', term[idx])
+  }
+  cbind(Term = term, txt)
 }
