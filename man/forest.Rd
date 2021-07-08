@@ -10,6 +10,8 @@ forest(x, ..., header = FALSE, total = NULL, plotArgs = list(), plot = TRUE)
 
 forest2(
   x,
+  header = FALSE,
+  total = NULL,
   col.group = c("grey95", "none"),
   groups = names(x),
   panel.last = NULL,
@@ -19,7 +21,7 @@ forest2(
 \method{plot}{forest}(
   x,
   panel_size = c(1, 1.5, 0.8),
-  col.rows,
+  col.rows = NULL,
   at.text = NULL,
   left_panel = NULL,
   center_panel = NULL,
@@ -52,12 +54,16 @@ and aggregated for a single plot}
 parameters passed to \code{\link{par}}}
 
 \item{header}{logical or a vector of character strings used as labels for
-each variable in the model}
+each variable in the model
+
+for \code{forest2}, a list of header vectors for each model}
 
 \item{total}{optional argument to give total number of observations, useful
 for models which have already removed missing observations; by default,
 the percentages will be relative to fitted models rather than total
-observations; see examples}
+observations; see examples
+
+for \code{forest2}, a vector of total observations for each model}
 
 \item{plotArgs}{a named list of additional arguments passed to
 \code{plot.forest}}
@@ -97,7 +103,8 @@ supported}
 \item{show_conf}{logical; if \code{TRUE}, the confidence interval is show
 with the estimate}
 
-\item{labels}{optional vector of labels for each row term}
+\item{labels}{optional vector of labels for each row term; alternatively, a
+function modifying the default generated row labels; see examples}
 
 \item{xlim}{the x-axis limits of the plot}
 
@@ -158,6 +165,10 @@ plot(x, show_conf = TRUE)
 palette(c('grey70', 'green4'))
 plot(x, show_conf = TRUE, cex = 3)
 palette('default')
+
+
+## use a function to modify default row labels
+plot(x, labels = function(x) gsub('^(sex|I)|[()]|(TRUE|FALSE)', '', x))
 
 
 ## add extra columns to left panel
@@ -244,14 +255,23 @@ group.col <- rep_len(c('grey95', 'none'), length(models))
 group.col <- rep(group.col, sapply(prep_lists, function(x) length(x$Term)))
 
 x <- Reduce(merge_forest, prep_lists)
+op <- par(no.readonly = TRUE)
 plot(x, col.rows = group.col, reset_par = FALSE)
 rl <- rev(rle(group.col)$lengths)
 yy <- rev(cumsum(head(c(0, rl), -1)) + rl / 2) + 0.5
-text(grconvertX(0.025, 'ndc'), yy, names(models),
+text(grconvertX(0.02, 'ndc'), yy, names(models),
      xpd = NA, srt = 90, adj = 0.5)
+par(op)
 
 ## or simply
 forest2(models)
+
+## same but with headers/totals for each model
+forest2(
+  models, total = c(230, 240, 250),
+  labels = function(x) gsub('sex|ph\\\\.ecog', '', x),
+  header = list(c('Age', 'Sex', 'ECOG PS'), c('Age', 'Sex'), 'Age')
+)
 
 
 ## other supported objects:

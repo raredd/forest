@@ -39,10 +39,14 @@
 #'   parameters passed to \code{\link{par}}
 #' @param header logical or a vector of character strings used as labels for
 #'   each variable in the model
+#'   
+#'   for \code{forest2}, a list of header vectors for each model
 #' @param total optional argument to give total number of observations, useful
 #'   for models which have already removed missing observations; by default,
 #'   the percentages will be relative to fitted models rather than total
 #'   observations; see examples
+#'   
+#'   for \code{forest2}, a vector of total observations for each model
 #' @param plotArgs a named list of additional arguments passed to
 #'   \code{plot.forest}
 #' @param plot logical; if \code{TRUE}, a forest plot is generated; otherwise,
@@ -61,7 +65,8 @@
 #' @param names optional vector of length 4 giving the labels for each column
 #' @param show_conf logical; if \code{TRUE}, the confidence interval is show
 #'   with the estimate
-#' @param labels optional vector of labels for each row term
+#' @param labels optional vector of labels for each row term; alternatively, a
+#'   function modifying the default generated row labels; see examples
 #' @param xlim the x-axis limits of the plot
 #' @param axes logical; if \code{TRUE}, the x-axis is plotted (default); to
 #'   show a custom axis, set \code{reset_par = FALSE} and use \code{\link{axis}}
@@ -101,6 +106,10 @@
 #' palette(c('grey70', 'green4'))
 #' plot(x, show_conf = TRUE, cex = 3)
 #' palette('default')
+#' 
+#' 
+#' ## use a function to modify default row labels
+#' plot(x, labels = function(x) gsub('^(sex|I)|[()]|(TRUE|FALSE)', '', x))
 #' 
 #' 
 #' ## add extra columns to left panel
@@ -187,14 +196,23 @@
 #' group.col <- rep(group.col, sapply(prep_lists, function(x) length(x$Term)))
 #' 
 #' x <- Reduce(merge_forest, prep_lists)
+#' op <- par(no.readonly = TRUE)
 #' plot(x, col.rows = group.col, reset_par = FALSE)
 #' rl <- rev(rle(group.col)$lengths)
 #' yy <- rev(cumsum(head(c(0, rl), -1)) + rl / 2) + 0.5
-#' text(grconvertX(0.025, 'ndc'), yy, names(models),
+#' text(grconvertX(0.02, 'ndc'), yy, names(models),
 #'      xpd = NA, srt = 90, adj = 0.5)
+#' par(op)
 #' 
 #' ## or simply
 #' forest2(models)
+#' 
+#' ## same but with headers/totals for each model
+#' forest2(
+#'   models, total = c(230, 240, 250),
+#'   labels = function(x) gsub('sex|ph\\.ecog', '', x),
+#'   header = list(c('Age', 'Sex', 'ECOG PS'), c('Age', 'Sex'), 'Age')
+#' )
 #' 
 #' 
 #' ## other supported objects:
@@ -279,13 +297,19 @@ forest <- function(x, ..., header = FALSE, total = NULL,
 #' 
 #' @rdname forest
 #' @export
-forest2 <- function(x, col.group = c('grey95', 'none'),
+forest2 <- function(x, header = FALSE, total = NULL,
+                    col.group = c('grey95', 'none'),
                     groups = names(x), panel.last = NULL, ...) {
   if (!inherits(x, 'list'))
     return(forest(x, ...))
   
-  prep_lists <- lapply(x, function(x) {
-    x <- forest(x, plot = FALSE)
+  header <- rep_len(header, length(x))
+  
+  if (!is.null(total))
+    total <- rep_len(total, length(x))
+  
+  prep_lists <- lapply(seq_along(x), function(ii) {
+    x <- forest(x[[ii]], plot = FALSE, header = header[[ii]], total = total[ii])
     structure(x[[1L]], class = 'cleanfp_list')
   })
   
@@ -300,7 +324,7 @@ forest2 <- function(x, col.group = c('grey95', 'none'),
     xx, col.rows = col.group, ...,
     panel.last = {
       if (!is.null(groups))
-        text(grconvertX(0.025, 'ndc'), yy, groups,
+        text(grconvertX(0.02, 'ndc'), yy, groups,
              xpd = NA, srt = 90, adj = 0.5)
       panel.last
     }
@@ -311,7 +335,8 @@ forest2 <- function(x, col.group = c('grey95', 'none'),
 
 #' @rdname forest
 #' @export
-plot.forest <- function(x, panel_size = c(1, 1.5, 0.8), col.rows, at.text = NULL,
+plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
+                        col.rows = NULL, at.text = NULL,
                         left_panel = NULL, center_panel = NULL, header = FALSE,
                         type = c('ci', 'box', 'tplot'),
                         show_percent = TRUE, show_columns = TRUE,
@@ -344,16 +369,27 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8), col.rows, at.text = NULL
   }
   nr <- nrow(nn)
   
+  if (is.function(labels)) {
+    labfun <- labels
+    labels <- NULL
+  } else {
+    labfun <- identity
+  }
+  
   if (!is.null(labels)) {
     ii <- if (length(ii <- grep('^  ', x[[1L]]))) {
-      labels <- paste0('  ', labels)
+      labels <- paste0(strrep(' ', 2L), labels)
       ii
     } else {
       labels <- as.character(labels)
-      
       seq.int(nr)
     }
     x[[1L]][ii] <- make.unique(rep_len(labels, nr))[seq_along(ii)]
+  } else {
+    ## identify and apply function only to row labels (not headers)
+    ii <- grep('^  ', x[[1L]])
+    lb <- gsub('^  ', '', x[[1L]][ii])
+    x[[1L]][ii] <- paste0(strrep(' ', 2L), labfun(lb))
   }
   
   type <- match.arg(type)
@@ -390,7 +426,7 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8), col.rows, at.text = NULL
   
   ## base plot
   # plot.null(lx)
-  col.rows <- if (missing(col.rows)) {
+  col.rows <- if (is.null(col.rows)) {
     grp <- as.integer(ox$cleanfp_ref[[1L]]$group)
     rep(c(grey(0.95), NA), length(grp))[grp]
   } else replace(col.rows, col.rows %in% 'none', NA)
