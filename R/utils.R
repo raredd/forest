@@ -192,7 +192,7 @@ summary.forest <- function(object, html = TRUE, ...) {
   txt <- cbind(txt, obj$`p-value`)
   txt[is.na(txt) | txt == ' - ' | txt == 'NA (NA)'] <- ''
   term <- gsub('^ +', if (html) '&emsp;' else ' ', obj$Term)
-  colnames(txt) <- c('HR', 'N (%)', '95% CI', 'p-value')
+  colnames(txt) <- c('Estimate', 'N (%)', 'CI', 'p-value')
   txt <- txt[, c(2L, 1L, 3:4)]
   if (html) {
     idx <- !grepl('^&em', term)
