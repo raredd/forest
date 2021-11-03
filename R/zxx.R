@@ -118,7 +118,7 @@ rescaler <- function(x, to = c(0, 1), from = range(x, na.rm = TRUE)) {
   (x - from[1L]) / diff(from) * diff(to) + to[1L]
 }
 
-roundr <- function(x, digits = 1L) {
+roundr <- function(x, digits = 1L, max = 1e3) {
   ## rawr:::roundr.default (with modifications)
   mode.ok <- vapply(x, function(x)
     is.numeric(x) || is.complex(x) || is.na(x), logical(1L))
@@ -128,6 +128,11 @@ roundr <- function(x, digits = 1L) {
   res <- sprintf(paste0('%.', digits = digits, 'f'), x)
   zzz <- paste0('0.', paste(rep('0', digits), collapse = ''))
   res[res == paste0('-', zzz)] <- zzz
+  
+  ## replace long strings with sci notation
+  idx <- abs(x) > max & !is.na(x)
+  if (any(idx))
+    res[idx] <- format(x, digits = digits)[idx]
   
   setNames(res, names(x))
 }
