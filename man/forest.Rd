@@ -10,6 +10,8 @@ forest(x, ..., header = FALSE, total = NULL, plotArgs = list(), plot = TRUE)
 
 forest2(
   x,
+  formula,
+  data,
   header = FALSE,
   total = NULL,
   col.group = c("grey95", "none"),
@@ -70,6 +72,10 @@ for \code{forest2}, a vector of total observations for each model}
 
 \item{plot}{logical; if \code{TRUE}, a forest plot is generated; otherwise,
 a list of data to plot is returned (see \code{plot.forest})}
+
+\item{formula, data}{for \code{forest2}, optional arguments to specify a
+formula and data set \emph{for each model}; note that this is only
+required for some objects; see \code{\link{cleanfp}}}
 
 \item{col.group}{a vector of colors for each model in \code{x}, recycled
 as needed}

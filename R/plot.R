@@ -291,29 +291,47 @@ forest <- function(x, ..., header = FALSE, total = NULL,
   invisible(x)
 }
 
+#' @param formula,data for \code{forest2}, optional arguments to specify a
+#'   formula and data set \emph{for each model}; note that this is only
+#'   required for some objects; see \code{\link{cleanfp}}
 #' @param col.group a vector of colors for each model in \code{x}, recycled
 #'   as needed
 #' @param groups labels for each model in \code{x}
 #' 
 #' @rdname forest
 #' @export
-forest2 <- function(x, header = FALSE, total = NULL,
+forest2 <- function(x, formula, data, header = FALSE, total = NULL,
                     col.group = c('grey95', 'none'),
                     groups = names(x), panel.last = NULL, ...) {
   if (!inherits(x, 'list'))
     return(forest(x, ...))
   
-  header <- rep_len(header, length(x))
+  lx <- length(x)
+  if (!missing(formula))
+    stopifnot(
+      islist(formula),
+      length(formula) == lx
+    )
+  if (!missing(data))
+    stopifnot(
+      islist(data),
+      length(data) == lx
+    )
+  
+  header <- rep_len(header, lx)
   
   if (!is.null(total))
-    total <- rep_len(total, length(x))
+    total <- rep_len(total, lx)
   
   prep_lists <- lapply(seq_along(x), function(ii) {
-    x <- forest(x[[ii]], plot = FALSE, header = header[[ii]], total = total[ii])
+    x <- forest(
+      x[[ii]], formula = formula[[ii]], data = data[[ii]], plot = FALSE,
+      header = header[[ii]], total = total[[ii]]
+    )
     structure(x[[1L]], class = 'cleanfp_list')
   })
   
-  col.group <- rep_len(col.group, length(x))
+  col.group <- rep_len(col.group, lx)
   col.group <- rep(col.group, sapply(prep_lists, function(x) length(x$Term)))
   
   xx <- Reduce(merge_forest, prep_lists)
