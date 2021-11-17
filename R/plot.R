@@ -62,6 +62,8 @@
 #'   supported
 #' @param show_percent logical; if \code{TRUE}, percents are shown for each row
 #' @param show_columns logical or a vector of logicals for each text column
+#' @param exclude_rows optional pattern to match row labels where any rows
+#'   matching will be excluded from the plot
 #' @param names optional vector of length 4 giving the labels for each column
 #' @param show_conf logical; if \code{TRUE}, the confidence interval is show
 #'   with the estimate
@@ -110,6 +112,15 @@
 #' 
 #' ## use a function to modify default row labels
 #' plot(x, labels = function(x) gsub('^(sex|I)|[()]|(TRUE|FALSE)', '', x))
+#' 
+#' 
+#' ## exclude rows without affecting the model -- !! experimental !!
+#' plot(x, exclude_rows = 'ecog2')
+#' 
+#' ## a useful case for exclude_rows
+#' cl <- coxph(Surv(time, status) ~ ph.ecog + sex + cluster(inst), data = lung2)
+#' forest(cl)
+#' forest(cl, exclude_rows = 'cluster')
 #' 
 #' 
 #' ## add extra columns to left panel
@@ -279,11 +290,25 @@
 #' 
 #' @export
 
-forest <- function(x, ..., header = FALSE, total = NULL,
+forest <- function(x, ..., header = FALSE, total = NULL, exclude_rows = NULL,
                    plotArgs = list(), plot = TRUE) {
   x <- cleanfp(x, ...)
   x <- add_reference(x, header = header, total = total)
   x <- prepare_forest(x)
+  
+  if (!is.null(exclude_rows)) {
+    ## hacky -- be sure to double check
+    obj <- x$cleanfp_list
+    idx <- grepl(exclude_rows, obj$Term)
+    vv <- c('Term', 'N', 'P', 'p-value', 'Estimate')
+    obj[vv] <- lapply(obj[vv], function(x) x[!idx])
+    obj$text <- lapply(obj$text, function(x) x[!idx])
+    obj$numeric <- obj$numeric[!idx, ]
+    
+    x$cleanfp_ref[[1L]] <- x$cleanfp_ref[[1L]][!idx, ]
+    x$cleanfp_ref[[2L]] <- x$cleanfp_ref[[2L]][!idx, ]
+    x$cleanfp_list <- obj
+  }
   
   if (plot)
     do.call('plot', c(list(x = x), plotArgs))
@@ -301,10 +326,11 @@ forest <- function(x, ..., header = FALSE, total = NULL,
 #' @rdname forest
 #' @export
 forest2 <- function(x, formula, data, header = FALSE, total = NULL,
+                    exclude_rows = NULL,
                     col.group = c('grey95', 'none'),
                     groups = names(x), panel.last = NULL, ...) {
   if (!inherits(x, 'list'))
-    return(forest(x, ...))
+    return(forest(x, header = header, total = total, exclude_rows = exclude_rows, ...))
   
   lx <- length(x)
   if (!missing(formula))
@@ -326,7 +352,7 @@ forest2 <- function(x, formula, data, header = FALSE, total = NULL,
   prep_lists <- lapply(seq_along(x), function(ii) {
     x <- forest(
       x[[ii]], formula = formula[[ii]], data = data[[ii]], plot = FALSE,
-      header = header[[ii]], total = total[[ii]]
+      header = header[[ii]], total = total[[ii]], exclude_rows = exclude_rows
     )
     structure(x[[1L]], class = 'cleanfp_list')
   })
@@ -358,6 +384,7 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
                         left_panel = NULL, center_panel = NULL, header = FALSE,
                         type = c('ci', 'box', 'tplot'),
                         show_percent = TRUE, show_columns = TRUE,
+                        exclude_rows = NULL,
                         names = NULL, show_conf = FALSE, labels = NULL,
                         xlim = NULL, axes = TRUE, logx = FALSE,
                         inner.mar = c(0, 0, 0, 0), reset_par = TRUE,
@@ -375,6 +402,21 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
   }
   
   assert_class(x, 'cleanfp_list')
+  
+  if (!is.null(exclude_rows)) {
+    ## hacky -- be sure to double check
+    obj <- x$cleanfp_list
+    idx <- grepl(exclude_rows, obj$Term)
+    vv <- c('Term', 'N', 'P', 'p-value', 'Estimate')
+    obj[vv] <- lapply(obj[vv], function(x) x[!idx])
+    obj$text <- lapply(obj$text, function(x) x[!idx])
+    obj$numeric <- obj$numeric[!idx, ]
+    
+    x$cleanfp_ref[[1L]] <- x$cleanfp_ref[[1L]][!idx, ]
+    x$cleanfp_ref[[2L]] <- x$cleanfp_ref[[2L]][!idx, ]
+    x$cleanfp_list <- obj
+  }
+  
   ox <- x
   nn <- data.frame(x$numeric)
   

@@ -6,7 +6,15 @@
 \alias{plot.forest}
 \title{Forest plot}
 \usage{
-forest(x, ..., header = FALSE, total = NULL, plotArgs = list(), plot = TRUE)
+forest(
+  x,
+  ...,
+  header = FALSE,
+  total = NULL,
+  exclude_rows = NULL,
+  plotArgs = list(),
+  plot = TRUE
+)
 
 forest2(
   x,
@@ -14,6 +22,7 @@ forest2(
   data,
   header = FALSE,
   total = NULL,
+  exclude_rows = NULL,
   col.group = c("grey95", "none"),
   groups = names(x),
   panel.last = NULL,
@@ -31,6 +40,7 @@ forest2(
   type = c("ci", "box", "tplot"),
   show_percent = TRUE,
   show_columns = TRUE,
+  exclude_rows = NULL,
   names = NULL,
   show_conf = FALSE,
   labels = NULL,
@@ -66,6 +76,9 @@ the percentages will be relative to fitted models rather than total
 observations; see examples
 
 for \code{forest2}, a vector of total observations for each model}
+
+\item{exclude_rows}{optional pattern to match row labels where any rows
+matching will be excluded from the plot}
 
 \item{plotArgs}{a named list of additional arguments passed to
 \code{plot.forest}}
@@ -175,6 +188,15 @@ palette('default')
 
 ## use a function to modify default row labels
 plot(x, labels = function(x) gsub('^(sex|I)|[()]|(TRUE|FALSE)', '', x))
+
+
+## exclude rows without affecting the model -- !! experimental !!
+plot(x, exclude_rows = 'ecog2')
+
+## a useful case for exclude_rows
+cl <- coxph(Surv(time, status) ~ ph.ecog + sex + cluster(inst), data = lung2)
+forest(cl)
+forest(cl, exclude_rows = 'cluster')
 
 
 ## add extra columns to left panel
