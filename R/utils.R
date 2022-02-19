@@ -13,16 +13,18 @@
 #' @param x,y objects
 #' @param header a character vector of header labels for each variable in
 #'   the model
-#' @param keep_strata logical; if \code{FALSE} (default), strata variables,
-#'   e.g., \code{y ~ strata(a) + b} will be ignored
 #' @param total optional total sample size, useful if model excludes
 #'   observations with missing data
+#' @param keep_strata,keep_cluster logical; if \code{FALSE} (default), strata
+#'   and/or cluster variables, e.g., \code{y ~ strata(a) + cluster(b)} will be
+#'   omitted from row output
 #' 
 #' @name forest_utils
 
 #' @rdname forest_utils
 #' @export
-add_reference <- function(x, header = FALSE, keep_strata = FALSE, total = NULL) {
+add_reference <- function(x, header = FALSE, total = NULL,
+                          keep_strata = FALSE, keep_cluster = FALSE) {
   assert_class(x, 'cleanfp')
   mf   <- x$model.frame %||% model.frame(x[[2L]])
   nums <- lapply(mf, get_n)
@@ -31,10 +33,12 @@ add_reference <- function(x, header = FALSE, keep_strata = FALSE, total = NULL) 
   lbls <- if (is.logical(header))
     NULL else header
   
-  if (!keep_strata) {
-    vars <- grep('strata\\(', vars, invert = TRUE, value = TRUE)
-    nums <- nums[grep('strata\\(', names(nums), invert = TRUE, value = TRUE)]
-    pcts <- pcts[grep('strata\\(', names(pcts), invert = TRUE, value = TRUE)]
+  pattern <- c('strata\\(', '\\(cluster\\)')[c(!keep_strata, !keep_cluster)]
+  if (length(pattern)) {
+    pattern <- sprintf('^(%s)', paste0(pattern, collapse = '|'))
+    vars <- grep(pattern, vars, invert = TRUE, value = TRUE)
+    nums <- nums[grep(pattern, names(nums), invert = TRUE, value = TRUE)]
+    pcts <- pcts[grep(pattern, names(pcts), invert = TRUE, value = TRUE)]
   }
   
   ## add suffixes for ordered factors to merge

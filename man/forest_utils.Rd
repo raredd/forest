@@ -7,7 +7,13 @@
 \alias{prepare_forest}
 \title{Forest utilities}
 \usage{
-add_reference(x, header = FALSE, keep_strata = FALSE, total = NULL)
+add_reference(
+  x,
+  header = FALSE,
+  total = NULL,
+  keep_strata = FALSE,
+  keep_cluster = FALSE
+)
 
 merge_forest(x, y)
 
@@ -19,11 +25,12 @@ prepare_forest(x)
 \item{header}{a character vector of header labels for each variable in
 the model}
 
-\item{keep_strata}{logical; if \code{FALSE} (default), strata variables,
-e.g., \code{y ~ strata(a) + b} will be ignored}
-
 \item{total}{optional total sample size, useful if model excludes
 observations with missing data}
+
+\item{keep_strata, keep_cluster}{logical; if \code{FALSE} (default), strata
+and/or cluster variables, e.g., \code{y ~ strata(a) + cluster(b)} will be
+omitted from row output}
 }
 \description{
 Not recommended to be called by the user.
