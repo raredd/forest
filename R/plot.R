@@ -95,29 +95,46 @@
 #'   age2 <- replace(age, sample(length(age), 50), NA)
 #' })
 #' 
-#' x <- coxph(Surv(time, status) ~ age + sex + ph.ecog +
-#'              I(meal.cal > 325.5) +
-#'              I(wt.loss < 9.5) +
-#'              I(ph.karno > 85) +
-#'              I(pat.karno > 65), lung2)
+#' cx <- coxph(Surv(time, status) ~ age + sex + ph.ecog +
+#'               I(meal.cal > 325.5) +
+#'               I(wt.loss < 9.5) +
+#'               I(ph.karno > 85) +
+#'               I(pat.karno > 65), lung2)
 #'              
-#' x <- forest(x, plot = FALSE)
+#' x <- forest(cx, plot = FALSE)
+#' plot(x, show_conf = TRUE)
+#' 
+#' ## change the p-value format
+#' x <- forest(cx, plot = FALSE, format_pval = format.pval)
+#' plot(x, show_conf = TRUE)
+#' 
+#' x <- forest(cx, plot = FALSE,
+#'   format_pval = function(x) forest:::pvalr(x, digits = 3)
+#' )
 #' plot(x, show_conf = TRUE)
 #' 
 #' ## change the color palette
 #' palette(c('grey70', 'green4'))
+#' plot(x, show_conf = TRUE, cex = 3)
+#' 
+#' palette(c('black', 'black'))
 #' plot(x, show_conf = TRUE, cex = 3)
 #' palette('default')
 #' 
 #' 
 #' ## use a function to modify default row labels
 #' plot(x, labels = function(x) gsub('^(sex|I)|[()]|(TRUE|FALSE)', '', x))
+#' ## compare to
+#' plot(x)
 #' 
 #' 
 #' ## exclude rows without affecting the model -- !! experimental !!
 #' plot(x, exclude_rows = 'ecog2')
 #' 
 #' ## a useful case for exclude_rows
+#' ## note that this no longer applies -- cluster/strata are already excluded
+#' ## from the model output, see keep_strata, keep_cluster args from
+#' ## forest::add_reference
 #' cl <- coxph(Surv(time, status) ~ ph.ecog + sex + cluster(inst), data = lung2)
 #' forest(cl)
 #' forest(cl, exclude_rows = 'cluster')
@@ -285,6 +302,12 @@
 #' 
 #' forest(
 #'   group ~ ., dat,
+#'   plotArgs = list(xlim = c(0, 20), show_conf = TRUE, cex = 1)
+#' )
+#' 
+#' ## excluding reference level
+#' forest(
+#'   group ~ ., dat, exclude_rows = '0$',
 #'   plotArgs = list(xlim = c(0, 20), show_conf = TRUE, cex = 1)
 #' )
 #' 
