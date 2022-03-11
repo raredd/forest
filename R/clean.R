@@ -75,8 +75,13 @@ cleanfp.coxph <- function(x, exp = TRUE, conf.int = 0.95,
   
   res[] <- lapply(res, roundr, digits = digits)
   
-  if (format_pval)
-    res$p.value <- pvalr(co[, grep('^Pr', colnames(co))])
+  pvals <- co[, grep('^Pr', colnames(co))]
+  
+  res$p.value <- if (isTRUE(format_pval))
+    pvalr(pvals)
+  else if (is.function(format_pval))
+    format_pval(pvals)
+  else format.pval(pvals)
   
   structure(
     list(cleanfp = res, object = x, model.frame = model.frame(x)),
@@ -108,8 +113,13 @@ cleanfp.crr <- function(x, formula, data, exp = TRUE, conf.int = 0.95,
   
   res[] <- lapply(res, roundr, digits = digits)
   
-  if (format_pval)
-    res$p.value <- pvalr(co[, grep('^p\\-value', colnames(co))])
+  pvals <- co[, grep('^p\\-value', colnames(co))]
+  
+  res$p.value <- if (isTRUE(format_pval))
+    pvalr(pvals)
+  else if (is.function(format_pval))
+    format_pval(pvals)
+  else format.pval(pvals)
   
   ## need extra things for later objects
   mf <- model.frame(formula, data)
@@ -161,8 +171,13 @@ cleanfp.coxphf <- function(x, formula = x$call$formula, data,
   
   res[] <- lapply(res, roundr, digits = digits)
   
-  if (format_pval)
-    res$p.value <- pvalr(ss$prob)
+  pvals <- ss$prob
+  
+  res$p.value <- if (isTRUE(format_pval))
+    pvalr(pvals)
+  else if (is.function(format_pval))
+    format_pval(pvals)
+  else format.pval(pvals)
   
   ## need extra things for later objects
   mf <- model.frame(formula, data)
@@ -199,8 +214,13 @@ cleanfp.logistf <- function(x, formula = x$call$formula, data,
   
   res[] <- lapply(res, roundr, digits = digits)
   
-  if (format_pval)
-    res$p.value <- pvalr(ss$prob)
+  pvals <- ss$prob
+  
+  res$p.value <- if (isTRUE(format_pval))
+    pvalr(pvals)
+  else if (is.function(format_pval))
+    format_pval(pvals)
+  else format.pval(pvals)
   
   structure(
     list(cleanfp = res, object = x,
@@ -237,8 +257,13 @@ cleanfp.glm <- function(x, exp = TRUE, conf.int = 0.95,
   
   res[] <- lapply(res, roundr, digits = digits)
   
-  if (format_pval)
-    res$p.value <- pvalr(co[, grep('^Pr', colnames(co))])
+  pvals <- co[, grep('^Pr', colnames(co))]
+  
+  res$p.value <- if (isTRUE(format_pval))
+    pvalr(pvals)
+  else if (is.function(format_pval))
+    format_pval(pvals)
+  else format.pval(pvals)
   
   structure(
     list(cleanfp = res, object = x, model.frame = model.frame(x)),
@@ -258,8 +283,13 @@ cleanfp.table <- function(x, conf.int = 0.95, digits = 2L,
   res[1:3] <- lapply(res[1:3], roundr, digits = digits)
   names(res)[2:3] <- paste0(names(res)[2:3], ' .', round(conf.int * 100))
   
-  if (format_pval)
-    res$p.value <- pvalr(res$p.value)
+  pvals <- res$p.value
+  
+  res$p.value <- if (isTRUE(format_pval))
+    pvalr(pvals)
+  else if (is.function(format_pval))
+    format_pval(pvals)
+  else format.pval(pvals)
   
   structure(
     list(cleanfp = res, object = x, model.frame = x),
@@ -295,8 +325,13 @@ cleanfp.formula <- function(formula = formula(data), data, conf.int = 0.95,
     order(res[, order], decreasing = decreasing)
   else seq.int(nrow(res))
   
-  if (format_pval)
-    res$p.value <- pvalr(res$p.value)
+  pvals <- res$p.value
+  
+  res$p.value <- if (isTRUE(format_pval))
+    pvalr(pvals)
+  else if (is.function(format_pval))
+    format_pval(pvals)
+  else format.pval(pvals)
   
   ## re-order each object the same
   formula <- reformulate(x[o], y)

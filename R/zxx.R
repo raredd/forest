@@ -69,34 +69,35 @@ islist <- function(x) {
   inherits(x, 'list')
 }
 
-pvalr <- function(pv, sig.limit = 0.001, digits = 3L, html = FALSE,
-                  show.p = FALSE, journal = TRUE, ...) {
+pvalr <- function(pv, sig.limit = 0.001, digits = 2L, scientific = FALSE,
+                  html = FALSE, show.p = FALSE, ...) {
   ## rawr::pvalr
   stopifnot(
     sig.limit > 0,
     sig.limit < 1
   )
   
-  show.p <- show.p + 1L
-  html   <- html + 1L
+  signif2 <- function(x, digits = 6L) {
+    ## rawr:::signif2
+    sapply(x, function(xx) {
+      s <- signif(xx, digits = digits)
+      formatC(s, digits = digits, format = 'fg', flag = '#')
+    })
+  }
   
-  sapply(pv, function(x, sig.limit) {
+  pstr <- c('', 'p ')[show.p + 1L]
+  high <- 1 - 1 / 10 ^ digits
+  
+  sapply(pv, function(x) {
     if (is.na(x) | !nzchar(x))
-      return(NA)
-    if (x >= 0.99)
-      return(paste0(c('', 'p ')[show.p], c('> ', '&gt; ')[html], '0.99'))
-    if (x >= 0.9 && !journal)
-      return(paste0(c('', 'p ')[show.p], c('> ', '&gt; ')[html], '0.9'))
-    if (x < sig.limit) {
-      paste0(c('', 'p ')[show.p], c('< ', '&lt; ')[html],
-             format.pval(sig.limit, ...))
-    } else {
-      nd <- if (journal)
-        c(digits, 2L)[findInterval(x, c(-Inf, .1, Inf))]
-      else c(digits, 2L, 1L)[findInterval(x, c(-Inf, .1, .5, Inf))]
-      paste0(c('', 'p = ')[show.p], roundr(x, nd))
-    }
-  }, sig.limit)
+      NA
+    else if (x > high)
+      paste0(pstr, c('> ', '&gt; ')[html + 1L], high)
+    else if (x < sig.limit)
+      paste0(pstr, c('< ', '&lt; ')[html + 1L],
+             format.pval(sig.limit, scientific = scientific))
+    else paste0(c('', 'p = ')[show.p + 1L], signif2(x, digits))
+  })
 }
 
 rescaler <- function(x, to = c(0, 1), from = range(x, na.rm = TRUE)) {
