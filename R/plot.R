@@ -348,6 +348,7 @@ forest <- function(x, ..., header = FALSE, total = NULL, exclude_rows = NULL,
 #' 
 #' @rdname forest
 #' @export
+
 forest2 <- function(x, formula, data, header = FALSE, total = NULL,
                     exclude_rows = NULL,
                     col.group = c('grey95', 'none'),
@@ -501,8 +502,6 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
   plot.new()
   # par(...)
   plot.window(1:2, range(lx, finite = TRUE))
-  # m <- matrix(c(1,1,1,2,3,4,5,5,5), 3L, byrow = TRUE)
-  # layout(m, heights = c(1, 10, 1))
   # plot.null()
   
   panel.first
@@ -543,7 +542,7 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
   vtext(
     unique(at$x), max(at$y) + rep_len(1L, length(lp)),
     col = rep_len(
-      replace(palette()[c(1, 1)], !show_columns[1:2], 'transparent'),
+      replace(palette()[c(1L, 1L)], !show_columns[1:2], 'transparent'),
       length(unique(at$x))
     ),
     names[nlp] %||% names(lp), font = 2, xpd = NA, adj = adj

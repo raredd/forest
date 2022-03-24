@@ -128,9 +128,6 @@ panel_ci <- function(data, y = rev(seq.int(nrow(data))),
                   )
            )
            # segments(data[, 2L], y, data[, 3L], yy, col = col)
-           ## suppressWarnings only working once ??
-           warn <- getOption('warn')
-           options(warn = -1L)
            
            lo <- data[, 2L]
            hi <- data[, 3L]
@@ -145,15 +142,15 @@ panel_ci <- function(data, y = rev(seq.int(nrow(data))),
            
            varrows <- Vectorize(arrows, c('code', 'angle'))
            for (ii in seq_along(y)) {
+             len <- grconvertX(hi[ii] - lo[ii], 'in') ## zero-length warning
              # if (anyNA(data[ii, -1L]))
-             if (is.na(data[ii, 2L]))
+             if (is.na(data[ii, 2L]) || len < 1e-3)
                next
-             varrows(lo[ii], y[ii], hi[ii], y[ii], col = col[ii],
-                     code = 1:2, length = 0.05, xpd = NA,
-                     angle = angles[ii, ])
+             varrows(
+               lo[ii], y[ii], hi[ii], y[ii], col = col[ii],
+               code = 1:2, length = 0.05, xpd = NA, angle = angles[ii, ]
+             )
            }
-           
-           options(warn = warn)
          }
          
          panel.last
