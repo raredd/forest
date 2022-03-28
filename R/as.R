@@ -24,6 +24,15 @@
 #' plot(x)
 #' 
 #' 
+#' ## with headers
+#' x <- c(NA, 1, 2, NA, 1, 2, 3)
+#' x <- as.forest(
+#'   x = x, lower = x - 1, upper = x + 1, p.value = replace(runif(7), is.na(x), NA),
+#'   labels = ifelse(is.na(x), 'header', paste0('   ', x)), N = x * 10, P = x / 10
+#' )
+#' plot(x, show_conf = TRUE)
+#' 
+#' 
 #' ## example forest plot
 #' dat <- data.frame(matrix(rnorm(100 * 8), 100))
 #' fit <- glm(I(X1 > 0.5) ~ ., dat, family = 'binomial')
