@@ -135,5 +135,7 @@ roundr <- function(x, digits = 1L, max = 1e3) {
   if (any(idx))
     res[idx] <- format(x, digits = digits)[idx]
   
+  res[is.na(x)] <- NA
+  
   setNames(res, names(x))
 }
