@@ -142,7 +142,7 @@ panel_ci <- function(data, y = rev(seq.int(nrow(data))),
            
            varrows <- Vectorize(arrows, c('code', 'angle'))
            for (ii in seq_along(y)) {
-             len <- grconvertX(hi[ii] - lo[ii], 'in') ## zero-length warning
+             len <- grconvertX(hi[ii] - lo[ii], 'user', 'in') ## zero-length warning
              # if (anyNA(data[ii, -1L]))
              if (is.na(data[ii, 2L]) || len < 1e-3)
                next
