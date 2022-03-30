@@ -41,7 +41,10 @@ forest2(
   show_percent = TRUE,
   show_columns = TRUE,
   exclude_rows = NULL,
+  sig.limit = 0.05,
+  col.sig = 1:2,
   names = NULL,
+  col.names = "black",
   show_conf = FALSE,
   labels = NULL,
   xlim = NULL,
@@ -117,7 +120,14 @@ supported}
 
 \item{show_columns}{logical or a vector of logicals for each text column}
 
+\item{sig.limit}{significance limit to highlight plot rows and p-values}
+
+\item{col.sig}{a vector of colors for \code{>= sig.limit} and
+\code{< sig.limit}, respectively, recycled as needed}
+
 \item{names}{optional vector of length 4 giving the labels for each column}
+
+\item{col.names}{a vector of colors for \code{names}, recycled as needed}
 
 \item{show_conf}{logical; if \code{TRUE}, the confidence interval is show
 with the estimate}
@@ -180,6 +190,11 @@ cx <- coxph(Surv(time, status) ~ age + sex + ph.ecog +
 x <- forest(cx, plot = FALSE)
 plot(x, show_conf = TRUE)
 
+## highlighting rows/p-values
+plot(x, sig.limit = 0.2, col.sig = c('darkgrey', 'red3'))
+plot(x, col.sig = 'black')
+
+
 ## change the p-value format
 x <- forest(cx, plot = FALSE, format_pval = format.pval)
 plot(x, show_conf = TRUE)
@@ -189,6 +204,9 @@ x <- forest(cx, plot = FALSE,
 )
 plot(x, show_conf = TRUE)
 
+
+\dontrun{
+## note that this works but better to use sig.limit/col.sig arguments
 ## change the color palette
 palette(c('grey70', 'green4'))
 plot(x, show_conf = TRUE, cex = 3)
@@ -196,6 +214,7 @@ plot(x, show_conf = TRUE, cex = 3)
 palette(c('black', 'black'))
 plot(x, show_conf = TRUE, cex = 3)
 palette('default')
+}
 
 
 ## use a function to modify default row labels

@@ -64,7 +64,11 @@
 #' @param show_columns logical or a vector of logicals for each text column
 #' @param exclude_rows optional pattern to match row labels where any rows
 #'   matching will be excluded from the plot
+#' @param sig.limit significance limit to highlight plot rows and p-values
+#' @param col.sig a vector of colors for \code{>= sig.limit} and
+#'   \code{< sig.limit}, respectively, recycled as needed
 #' @param names optional vector of length 4 giving the labels for each column
+#' @param col.names a vector of colors for \code{names}, recycled as needed
 #' @param show_conf logical; if \code{TRUE}, the confidence interval is show
 #'   with the estimate
 #' @param labels optional vector of labels for each row term; alternatively, a
@@ -104,6 +108,11 @@
 #' x <- forest(cx, plot = FALSE)
 #' plot(x, show_conf = TRUE)
 #' 
+#' ## highlighting rows/p-values
+#' plot(x, sig.limit = 0.2, col.sig = c('darkgrey', 'red3'))
+#' plot(x, col.sig = 'black')
+#' 
+#' 
 #' ## change the p-value format
 #' x <- forest(cx, plot = FALSE, format_pval = format.pval)
 #' plot(x, show_conf = TRUE)
@@ -113,6 +122,9 @@
 #' )
 #' plot(x, show_conf = TRUE)
 #' 
+#' 
+#' \dontrun{
+#' ## note that this works but better to use sig.limit/col.sig arguments
 #' ## change the color palette
 #' palette(c('grey70', 'green4'))
 #' plot(x, show_conf = TRUE, cex = 3)
@@ -120,6 +132,7 @@
 #' palette(c('black', 'black'))
 #' plot(x, show_conf = TRUE, cex = 3)
 #' palette('default')
+#' }
 #' 
 #' 
 #' ## use a function to modify default row labels
@@ -350,8 +363,7 @@ forest <- function(x, ..., header = FALSE, total = NULL, exclude_rows = NULL,
 #' @export
 
 forest2 <- function(x, formula, data, header = FALSE, total = NULL,
-                    exclude_rows = NULL,
-                    col.group = c('grey95', 'none'),
+                    exclude_rows = NULL, col.group = c('grey95', 'none'),
                     groups = names(x), panel.last = NULL, ...) {
   if (!inherits(x, 'list'))
     return(forest(x, header = header, total = total, exclude_rows = exclude_rows, ...))
@@ -409,7 +421,9 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
                         type = c('ci', 'box', 'tplot'),
                         show_percent = TRUE, show_columns = TRUE,
                         exclude_rows = NULL,
-                        names = NULL, show_conf = FALSE, labels = NULL,
+                        sig.limit = 0.05, col.sig = 1:2,
+                        names = NULL, col.names = 'black',
+                        show_conf = FALSE, labels = NULL,
                         xlim = NULL, axes = TRUE, logx = FALSE,
                         inner.mar = c(0, 0, 0, 0), reset_par = TRUE,
                         panel.first = NULL, panel.last = NULL,
@@ -486,7 +500,12 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
   conf.int <- gsub('\\.(\\d+)|.', '\\1', names(nn)[3L])
   
   ## color pvalues < 0.05
-  col <- grepl('\\.0[0-4]', x$`p-value`) + 1L
+  # col <- grepl('\\.0[0-4]', x$`p-value`) + 1L
+  ## color pvalues < sig.limit
+  col <- (x$numeric$p.value < sig.limit) + 1L
+  col <- rep_len(col.sig, 2L)[col]
+  
+  col.names <- rep_len(col.names, 4L)
   
   ## identify reference lines
   which_ref <- grep('Reference', x$Estimate)
@@ -542,7 +561,7 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
   vtext(
     unique(at$x), max(at$y) + rep_len(1L, length(lp)),
     col = rep_len(
-      replace(palette()[c(1L, 1L)], !show_columns[1:2], 'transparent'),
+      replace(col.names[1:2], !show_columns[1:2], 'transparent'),
       length(unique(at$x))
     ),
     names[nlp] %||% names(lp), font = 2, xpd = NA, adj = adj
@@ -580,14 +599,14 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
     unique(at$x)[1:3], max(at$y) + c(1, 1, 1),
     names[c(1:2, 2) + length(lp)] %||% names(rp),
     font = 2L, xpd = NA, adj = c(NA, NA, 1),
-    col = replace(c(palette()[1:2], 'transparent'),
+    col = replace(c(col.names[3:4], 'transparent'),
                   !show_columns[c(3, 4, 4)], 'transparent')
   )
   
   
   ## center panel
   yy <- rev(lx)
-  rn <- range(unlist(nn), na.rm = TRUE, finite = TRUE)
+  rn <- range(unlist(nn[, 1:3]), na.rm = TRUE, finite = TRUE)
   
   ## get xlim if given, force min at 0
   xlim <- xlim %||% c(0, max(rn))
