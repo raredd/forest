@@ -76,6 +76,7 @@ cleanfp.coxph <- function(x, exp = TRUE, conf.int = 0.95,
   res[] <- lapply(res, roundr, digits = digits)
   
   pvals <- co[, grep('^Pr', colnames(co))]
+  res <- cbind(res, p.value.numeric = pvals)
   
   res$p.value <- if (isTRUE(format_pval))
     pvalr(pvals)
@@ -114,6 +115,7 @@ cleanfp.crr <- function(x, formula, data, exp = TRUE, conf.int = 0.95,
   res[] <- lapply(res, roundr, digits = digits)
   
   pvals <- co[, grep('^p\\-value', colnames(co))]
+  res <- cbind(res, p.value.numeric = pvals)
   
   res$p.value <- if (isTRUE(format_pval))
     pvalr(pvals)
@@ -172,6 +174,7 @@ cleanfp.coxphf <- function(x, formula = x$call$formula, data,
   res[] <- lapply(res, roundr, digits = digits)
   
   pvals <- ss$prob
+  res <- cbind(res, p.value.numeric = pvals)
   
   res$p.value <- if (isTRUE(format_pval))
     pvalr(pvals)
@@ -215,6 +218,7 @@ cleanfp.logistf <- function(x, formula = x$call$formula, data,
   res[] <- lapply(res, roundr, digits = digits)
   
   pvals <- ss$prob
+  res <- cbind(res, p.value.numeric = pvals)
   
   res$p.value <- if (isTRUE(format_pval))
     pvalr(pvals)
@@ -258,6 +262,7 @@ cleanfp.glm <- function(x, exp = TRUE, conf.int = 0.95,
   res[] <- lapply(res, roundr, digits = digits)
   
   pvals <- co[, grep('^Pr', colnames(co))]
+  res <- cbind(res, p.value.numeric = pvals)
   
   res$p.value <- if (isTRUE(format_pval))
     pvalr(pvals)
@@ -284,6 +289,7 @@ cleanfp.table <- function(x, conf.int = 0.95, digits = 2L,
   names(res)[2:3] <- paste0(names(res)[2:3], ' .', round(conf.int * 100))
   
   pvals <- res$p.value
+  res <- cbind(res, p.value.numeric = pvals)
   
   res$p.value <- if (isTRUE(format_pval))
     pvalr(pvals)
@@ -326,6 +332,7 @@ cleanfp.formula <- function(formula = formula(data), data, conf.int = 0.95,
   else seq.int(nrow(res))
   
   pvals <- res$p.value
+  res <- cbind(res, p.value.numeric = pvals)
   
   res$p.value <- if (isTRUE(format_pval))
     pvalr(pvals)

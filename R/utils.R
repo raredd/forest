@@ -80,10 +80,10 @@ add_reference <- function(x, header = FALSE, total = NULL,
   }
   
   ## extra data with numeric values
-  dd_n <- dd[, -c(1L, ncol(dd))]
+  dd_n <- dd[, c(2:4, 6)]
   suppressWarnings({
     dd_n[] <- lapply(dd_n, as.numeric)
-    ## remove p-value formatting (eg, "< 0.01") -- or fix 
+    ## remove p-value formatting (eg, "< 0.01") -- or fix
     # dd_n[] <- lapply(dd_n, function(x) as.numeric(gsub('[< ]', '', x)))
   })
   
