@@ -1,12 +1,3 @@
-<style>
-img {
-  max-height: 400px;
-}
-table {
-  max-width: 500px;
-}
-</style>
-
 ## forest plots
 
 this is an experimental package and not to be trusted
