@@ -93,24 +93,9 @@ models <- list(
   'Model 3' = coxph(Surv(time, status) ~ age, lung2)
 )
 
-prep_lists <- lapply(models, forest, plot = FALSE)
-prep_lists <- lapply(prep_lists, function(x)
-  `class<-`(x[[1L]], 'cleanfp_list'))
-x <- Reduce(merge_forest, prep_lists)
-
-group.col <- rep_len(c('grey95', 'none'), length(models))
-group.col <- rep(group.col, sapply(prep_lists, function(x) length(x$Term)))
-
-palette(c('grey70', 'green4'))
-plot(
-  x, col.rows = group.col, reset_par = FALSE, cex = 2,
+forest2(
+  models, cex = 2, col.sig = c('grey70', 'green4'),
   panel_size = c(2, 3, 2), xlim = c(0, 10)
-)
-palette('default')
-rl <- rev(rle(group.col)$lengths)
-text(
-  grconvertX(0.025, 'ndc'), rev(cumsum(head(c(0, rl), -1)) + rl / 2) + 0.5,
-  names(models), xpd = NA, srt = 90, adj = 0.5
 )
 box('outer')
 ```
@@ -157,6 +142,31 @@ legend(
   6, 8.5, legend = c('Point estimate', '95% CI'),
   col = 1:2, pch = c(16, 1), bty = 'n', xpd = NA
 )
+box('outer')
+```
+
+## Coerce raw data to a forest plot
+
+```{r as}
+set.seed(1)
+x <- c(NA, 1, 2, NA, 1, 2, 3)
+dat <- data.frame(
+  N = x * 10,
+  x = x,
+  lower = x - 1,
+  upper = x + 1,
+  p.value = replace(runif(7), is.na(x), NA)
+)
+dat
+
+x <- as.forest(
+  x = dat$x, lower = dat$lower, upper = dat$upper, p.value = dat$p.value,
+  labels = ifelse(is.na(dat$x), 'header', paste0('   ', x)),
+  N = dat$N, P = dat$N / 100
+)
+x
+
+plot(x, show_conf = TRUE)
 box('outer')
 ```
 

@@ -1,8 +1,17 @@
+<style>
+img {
+  max-height: 400px;
+}
+table {
+  max-width: 500px;
+}
+</style>
+
 ## forest plots
 
 this is an experimental package and not to be trusted
 
------
+------------------------------------------------------------------------
 
 ## Installation
 
@@ -14,7 +23,7 @@ devtools::install_github('raredd/forest')
 ## Basic usage and supported models/objects
 
 | object               | package                                                          |
-| :------------------- | :--------------------------------------------------------------- |
+|:---------------------|:-----------------------------------------------------------------|
 | <code>coxph</code>   | **[survival](https://cran.r-project.org/web/packages/survival)** |
 | <code>coxphf</code>  | **[coxphf](https://cran.r-project.org/web/packages/coxphf)**     |
 | <code>crr</code>     | **[cmprsk](https://cran.r-project.org/web/packages/cmprsk)**     |
@@ -63,24 +72,9 @@ models <- list(
   'Model 3' = coxph(Surv(time, status) ~ age, lung2)
 )
 
-prep_lists <- lapply(models, forest, plot = FALSE)
-prep_lists <- lapply(prep_lists, function(x)
-  `class<-`(x[[1L]], 'cleanfp_list'))
-x <- Reduce(merge_forest, prep_lists)
-
-group.col <- rep_len(c('grey95', 'none'), length(models))
-group.col <- rep(group.col, sapply(prep_lists, function(x) length(x$Term)))
-
-palette(c('grey70', 'green4'))
-plot(
-  x, col.rows = group.col, reset_par = FALSE, cex = 2,
+forest2(
+  models, cex = 2, col.sig = c('grey70', 'green4'),
   panel_size = c(2, 3, 2), xlim = c(0, 10)
-)
-palette('default')
-rl <- rev(rle(group.col)$lengths)
-text(
-  grconvertX(0.025, 'ndc'), rev(cumsum(head(c(0, rl), -1)) + rl / 2) + 0.5,
-  names(models), xpd = NA, srt = 90, adj = 0.5
 )
 box('outer')
 ```
@@ -136,19 +130,68 @@ box('outer')
 
 <img src="inst/etc/tplot-1.png" style="display: block; margin: auto;" />
 
+## Coerce raw data to a forest plot
+
+``` r
+set.seed(1)
+x <- c(NA, 1, 2, NA, 1, 2, 3)
+dat <- data.frame(
+  N = x * 10,
+  x = x,
+  lower = x - 1,
+  upper = x + 1,
+  p.value = replace(runif(7), is.na(x), NA)
+)
+dat
+```
+
+    ##    N  x lower upper   p.value
+    ## 1 NA NA    NA    NA        NA
+    ## 2 10  1     0     2 0.3721239
+    ## 3 20  2     1     3 0.5728534
+    ## 4 NA NA    NA    NA        NA
+    ## 5 10  1     0     2 0.2016819
+    ## 6 20  2     1     3 0.8983897
+    ## 7 30  3     2     4 0.9446753
+
+``` r
+x <- as.forest(
+  x = dat$x, lower = dat$lower, upper = dat$upper, p.value = dat$p.value,
+  labels = ifelse(is.na(dat$x), 'header', paste0('   ', x)),
+  N = dat$N, P = dat$N / 100
+)
+x
+```
+
+    ##      Term     N (%)     Estimate CI            p-value
+    ## [1,] "header" ""        ""       ""            ""     
+    ## [2,] " 1"     "10 (10)" "1.00"   "0.00 - 2.00" "0.37" 
+    ## [3,] " 2"     "20 (20)" "2.00"   "1.00 - 3.00" "0.57" 
+    ## [4,] "header" ""        ""       ""            ""     
+    ## [5,] " 1"     "10 (10)" "1.00"   "0.00 - 2.00" "0.20" 
+    ## [6,] " 2"     "20 (20)" "2.00"   "1.00 - 3.00" "0.90" 
+    ## [7,] " 3"     "30 (30)" "3.00"   "2.00 - 4.00" "0.94"
+
+``` r
+plot(x, show_conf = TRUE)
+box('outer')
+```
+
+<img src="inst/etc/as-1.png" style="display: block; margin: auto;" />
+
 ## Session info
 
 ``` r
 within.list(sessionInfo(), loadedOnly <- NULL)
 ```
 
-    ## R version 4.0.2 (2020-06-22)
+    ## R version 4.1.2 (2021-11-01)
     ## Platform: x86_64-apple-darwin17.0 (64-bit)
-    ## Running under: macOS Mojave 10.14.6
+    ## Running under: macOS Big Sur 10.16
     ## 
     ## Matrix products: default
-    ## BLAS:   /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib
-    ## LAPACK: /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
+    ## BLAS:   /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRblas.0.dylib
+    ## LAPACK: /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRlapack.dylib
     ## 
     ## locale:
     ## [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
@@ -157,4 +200,4 @@ within.list(sessionInfo(), loadedOnly <- NULL)
     ## [1] stats     graphics  grDevices utils     datasets  methods   base     
     ## 
     ## other attached packages:
-    ## [1] rawr_0.9.2        survival_3.2-7    knitr_1.31        forest_0.0.0.9000
+    ## [1] rawr_1.0.1        survival_3.3-2    knitr_1.38        forest_0.0.0.9000
