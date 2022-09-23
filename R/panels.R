@@ -146,7 +146,7 @@ panel_ci <- function(data, y = rev(seq.int(nrow(data))),
              len <- grconvertX(hi[ii], 'user', 'in') -
                grconvertX(lo[ii], 'user', 'in')
              # if (anyNA(data[ii, -1L]))
-             if (is.na(data[ii, 2L]) || len < 1e-3)
+             if (is.na(data[ii, 2L]) || is.na(len) || len < 1e-3)
                next
              varrows(
                lo[ii], y[ii], hi[ii], y[ii], col = col[ii],
