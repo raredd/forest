@@ -64,6 +64,7 @@
 #' @param show_columns logical or a vector of logicals for each text column
 #' @param exclude_rows optional pattern to match row labels where any rows
 #'   matching will be excluded from the plot
+#' @param ref_label label for reference groups; default is \code{"Reference"}
 #' @param sig.limit significance limit to highlight plot rows and p-values
 #' @param col.sig a vector of colors for \code{>= sig.limit} and
 #'   \code{< sig.limit}, respectively, recycled as needed
@@ -71,6 +72,9 @@
 #' @param col.names a vector of colors for \code{names}, recycled as needed
 #' @param show_conf logical; if \code{TRUE}, the confidence interval is show
 #'   with the estimate
+#' @param conf_format the format for the confidence intervals; default is
+#'   \code{"(\%s, \%s)"} with placeholders for the lower and upper limits,
+#'   respectively
 #' @param labels optional vector of labels for each row term; alternatively, a
 #'   function modifying the default generated row labels; see examples
 #' @param xlim the x-axis limits of the plot
@@ -420,10 +424,10 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
                         left_panel = NULL, center_panel = NULL, header = FALSE,
                         type = c('ci', 'box', 'tplot'),
                         show_percent = TRUE, show_columns = TRUE,
-                        exclude_rows = NULL,
+                        exclude_rows = NULL, ref_label = 'Reference',
                         sig.limit = 0.05, col.sig = 1:2,
                         names = NULL, col.names = 'black',
-                        show_conf = FALSE, labels = NULL,
+                        show_conf = FALSE, conf_format = '(%s, %s)', labels = NULL,
                         xlim = NULL, axes = TRUE, logx = FALSE,
                         inner.mar = c(0, 0, 0, 0), reset_par = TRUE,
                         panel.first = NULL, panel.last = NULL,
@@ -515,6 +519,9 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
   
   lx <- seq_along(x[[1L]])
   nx <- length(lx)
+  
+  if (layout == 'unified')
+    panel_size <- c(head(panel_size, -2L), rev(tail(panel_size, 2L)))
   panel_size <- panel_size / sum(panel_size)
   xcf <- cumsum(panel_size)[-length(panel_size)]
   
@@ -572,10 +579,12 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
   rp <- x[c('Estimate', 'p-value', 'p-value')]
   rp <- c(rp, NULL)
   np <- seq_along(rp)
+  cf <- paste('%s', conf_format[1L])
+  ri <- grepl('Reference', rp[[1L]])
   if (show_conf) {
     rp$Estimate <- ifelse(
-      grepl('Reference', rp[[1L]]), rp[[1L]],
-      sprintf('%s (%s, %s)', rp[[1L]], x$text$low, x$text$high)
+      ri, replace(rp[[1L]], ri, ref_label),
+      sprintf(cf, rp[[1L]], x$text$low, x$text$high)
     )
     rp$Estimate <- gsub('(NA.*){3}', '', rp$Estimate)
     names(rp)[1L] <- 'Estimate (LCI, UCI)'

@@ -41,11 +41,13 @@ forest2(
   show_percent = TRUE,
   show_columns = TRUE,
   exclude_rows = NULL,
+  ref_label = "Reference",
   sig.limit = 0.05,
   col.sig = 1:2,
   names = NULL,
   col.names = "black",
   show_conf = FALSE,
+  conf_format = "(\%s, \%s)",
   labels = NULL,
   xlim = NULL,
   axes = TRUE,
@@ -120,6 +122,8 @@ supported}
 
 \item{show_columns}{logical or a vector of logicals for each text column}
 
+\item{ref_label}{label for reference groups; default is \code{"Reference"}}
+
 \item{sig.limit}{significance limit to highlight plot rows and p-values}
 
 \item{col.sig}{a vector of colors for \code{>= sig.limit} and
@@ -131,6 +135,10 @@ supported}
 
 \item{show_conf}{logical; if \code{TRUE}, the confidence interval is show
 with the estimate}
+
+\item{conf_format}{the format for the confidence intervals; default is
+\code{"(\%s, \%s)"} with placeholders for the lower and upper limits,
+respectively}
 
 \item{labels}{optional vector of labels for each row term; alternatively, a
 function modifying the default generated row labels; see examples}
