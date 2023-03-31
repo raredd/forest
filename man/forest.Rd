@@ -46,6 +46,7 @@ forest2(
   col.sig = 1:2,
   names = NULL,
   col.names = "black",
+  font.names = 2L,
   show_conf = FALSE,
   conf_format = "(\%s, \%s)",
   labels = NULL,
@@ -131,7 +132,8 @@ supported}
 
 \item{names}{optional vector of length 4 giving the labels for each column}
 
-\item{col.names}{a vector of colors for \code{names}, recycled as needed}
+\item{col.names, font.names}{color and font vectors for \code{names},
+recycled as needed}
 
 \item{show_conf}{logical; if \code{TRUE}, the confidence interval is show
 with the estimate}

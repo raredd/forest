@@ -69,7 +69,8 @@
 #' @param col.sig a vector of colors for \code{>= sig.limit} and
 #'   \code{< sig.limit}, respectively, recycled as needed
 #' @param names optional vector of length 4 giving the labels for each column
-#' @param col.names a vector of colors for \code{names}, recycled as needed
+#' @param col.names,font.names color and font vectors for \code{names},
+#'   recycled as needed
 #' @param show_conf logical; if \code{TRUE}, the confidence interval is show
 #'   with the estimate
 #' @param conf_format the format for the confidence intervals; default is
@@ -426,7 +427,7 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
                         show_percent = TRUE, show_columns = TRUE,
                         exclude_rows = NULL, ref_label = 'Reference',
                         sig.limit = 0.05, col.sig = 1:2,
-                        names = NULL, col.names = 'black',
+                        names = NULL, col.names = 'black', font.names = 2L,
                         show_conf = FALSE, conf_format = '(%s, %s)', labels = NULL,
                         xlim = NULL, axes = TRUE, logx = FALSE,
                         inner.mar = c(0, 0, 0, 0), reset_par = TRUE,
@@ -510,6 +511,7 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
   col <- rep_len(col.sig, 2L)[col]
   
   col.names <- rep_len(col.names, 4L)
+  font.names <- rep_len(font.names, 4L)
   
   ## identify reference lines
   which_ref <- grep('Reference', x$Estimate)
@@ -571,7 +573,9 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
       replace(col.names[1:2], !show_columns[1:2], 'transparent'),
       length(unique(at$x))
     ),
-    names[nlp] %||% names(lp), font = 2, xpd = NA, adj = adj
+    names[nlp] %||% names(lp),
+    font = font.names[rep_len(font.names[1:2], length(unique(at$x)))],
+    xpd = NA, adj = adj
   )
   
   
@@ -607,7 +611,7 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
   vtext(
     unique(at$x)[1:3], max(at$y) + c(1, 1, 1),
     names[c(1:2, 2) + length(lp)] %||% names(rp),
-    font = 2L, xpd = NA, adj = c(NA, NA, 1),
+    font = font.names[c(3, 4, 4)], xpd = NA, adj = c(NA, NA, 1),
     col = replace(c(col.names[3:4], 'transparent'),
                   !show_columns[c(3, 4, 4)], 'transparent')
   )
