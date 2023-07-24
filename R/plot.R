@@ -357,6 +357,30 @@ forest <- function(x, ..., header = FALSE, total = NULL, exclude_rows = NULL,
   invisible(x)
 }
 
+order_forest <- function(x, order = NULL) {
+  if (is.null(order))
+    return(x)
+  f2 <- is.null(x$cleanfp_list)
+  if (f2)
+    x <- list(cleanfp_list = x, cleanfp_ref = NULL)
+  
+  ## hacky -- be sure to double check
+  obj <- x$cleanfp_list
+  idx <- seq_along(obj$Term)
+  idx <- unique(c(order, idx))
+  vv <- c('Term', 'N', 'P', 'p-value', 'Estimate')
+  obj[vv] <- lapply(obj[vv], function(x) x[idx])
+  obj$text <- lapply(obj$text, function(x) x[idx])
+  obj$numeric <- obj$numeric[idx, ]
+  
+  x$cleanfp_ref[[1L]] <- x$cleanfp_ref[[1L]][idx, ]
+  x$cleanfp_ref[[2L]] <- x$cleanfp_ref[[2L]][idx, ]
+  x$cleanfp_list <- obj
+  
+  if (f2)
+    x$cleanfp_list else x
+}
+
 #' @param formula,data for \code{forest2}, optional arguments to specify a
 #'   formula and data set \emph{for each model}; note that this is only
 #'   required for some objects; see \code{\link{cleanfp}}
@@ -369,7 +393,7 @@ forest <- function(x, ..., header = FALSE, total = NULL, exclude_rows = NULL,
 
 forest2 <- function(x, formula, data, header = FALSE, total = NULL,
                     exclude_rows = NULL, col.group = c('grey95', 'none'),
-                    groups = names(x), panel.last = NULL, ...) {
+                    groups = names(x), panel.last = NULL, FUN = NULL, ...) {
   if (!inherits(x, 'list'))
     return(forest(x, header = header, total = total, exclude_rows = exclude_rows, ...))
   
@@ -405,6 +429,9 @@ forest2 <- function(x, formula, data, header = FALSE, total = NULL,
   rl <- rev(rle(col.group)$lengths)
   yy <- rev(cumsum(head(c(0, rl), -1)) + rl / 2) + 0.5
   
+  if (!is.null(FUN))
+    xx <- FUN(xx)
+  
   plot(
     xx, col.rows = col.group, ...,
     panel.last = {
@@ -432,7 +459,7 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
                         xlim = NULL, axes = TRUE, logx = FALSE,
                         inner.mar = c(0, 0, 0, 0), reset_par = TRUE,
                         panel.first = NULL, panel.last = NULL,
-                        layout = c('split', 'unified'), ...) {
+                        layout = c('split', 'unified'), order = NULL, ...) {
   op <- par(no.readonly = TRUE)
   if (reset_par)
     on.exit(par(op))
@@ -445,6 +472,8 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
   }
   
   assert_class(x, 'cleanfp_list')
+  
+  x <- order_forest(x, order)
   
   if (!is.null(exclude_rows)) {
     ## hacky -- be sure to double check
@@ -517,7 +546,7 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
   which_ref <- grep('Reference', x$Estimate)
   
   ## text columns to show
-  show_columns <- rep_len(show_columns, 4L)
+  show_columns <- rep_len(show_columns, 4L + length(left_panel))
   
   lx <- seq_along(x[[1L]])
   nx <- length(lx)
@@ -568,13 +597,13 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
     adj = rep(adj, each = nr), font = 1L, at = at.text[nlp]
   ) -> at
   vtext(
-    unique(at$x), max(at$y) + rep_len(1L, length(lp)),
+    at$x[nlp], max(at$y) + rep_len(1L, length(lp)),
     col = rep_len(
-      replace(col.names[1:2], !show_columns[1:2], 'transparent'),
-      length(unique(at$x))
+      replace(col.names[nlp], !show_columns[nlp], 'transparent'),
+      length(at$x[nlp])
     ),
     names[nlp] %||% names(lp),
-    font = font.names[rep_len(font.names[1:2], length(unique(at$x)))],
+    font = font.names[rep_len(font.names[nlp], length(unique(at$x)))],
     xpd = NA, adj = adj
   )
   

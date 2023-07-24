@@ -26,6 +26,7 @@ forest2(
   col.group = c("grey95", "none"),
   groups = names(x),
   panel.last = NULL,
+  FUN = NULL,
   ...
 )
 
@@ -58,6 +59,7 @@ forest2(
   panel.first = NULL,
   panel.last = NULL,
   layout = c("split", "unified"),
+  order = NULL,
   ...
 )
 }
