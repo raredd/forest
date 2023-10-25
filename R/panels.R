@@ -148,10 +148,12 @@ panel_ci <- function(data, y = rev(seq.int(nrow(data))),
              # if (anyNA(data[ii, -1L]))
              if (is.na(data[ii, 2L]) || is.na(len) || len < 1e-3)
                next
-             varrows(
-               lo[ii], y[ii], hi[ii], y[ii], col = col[ii],
-               code = 1:2, length = 0.05, xpd = NA, angle = angles[ii, ]
-             )
+             try({
+               varrows(
+                 lo[ii], y[ii], hi[ii], y[ii], col = col[ii],
+                 code = 1:2, length = 0.05, xpd = NA, angle = angles[ii, ]
+               )
+             })
            }
          }
          
