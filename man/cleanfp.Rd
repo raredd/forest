@@ -12,6 +12,7 @@
 \alias{cleanfp.glm}
 \alias{cleanfp.table}
 \alias{cleanfp.formula}
+\alias{cleanfp.lm}
 \title{Clean objects for forest}
 \usage{
 cleanfp(x, ...)
@@ -79,6 +80,8 @@ cleanfp(x, ...)
   decreasing = FALSE,
   ...
 )
+
+\method{cleanfp}{lm}(x, conf.int = 0.95, digits = 2L, format_pval = TRUE, ...)
 }
 \arguments{
 \item{x}{an object or formula}

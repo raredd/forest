@@ -186,6 +186,8 @@ steps and return an object ready for plotting and further customization
 with the arguments in \code{plot.forest}.
 }
 \examples{
+forest(lm(mpg ~ ., mtcars), plotArgs = list(xlim = c(-5, 5), vline = 0))
+
 library('survival')
 lung2 <- within(lung, {
   sex <- factor(sex, 1:2, c('Male', 'Female'))

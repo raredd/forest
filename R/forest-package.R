@@ -20,6 +20,7 @@
 #'   \code{type = ...}; see \code{\link[brglm2]{brglmFit}} \cr
 #' \tab \code{\link[logistf]{logistf}} \tab Logistic regression with Firth's
 #'   penalized likelihood from the \pkg{logistf} package \cr
+#' \tab \code{\link{lm}} \tab Linear regression \cr
 #' \tab \code{\link{formula}} \tab Odds ratios and Fisher's exact tests via
 #'   \code{\link{fisher.test}} \cr
 #' }

@@ -1,5 +1,5 @@
 ### forest cleaning utils
-# objects supported: coxph, coxphf, crr, crr2, glm, logistf
+# objects supported: coxph, coxphf, crr, crr2, glm, logistf, table, lm
 # 
 # S3 methods: cleanfp
 # cleanfp.default, cleanfp.coxph, cleanfp.coxphf, cleanfp.crr, cleanfp.crr2,
@@ -250,6 +250,7 @@ cleanfp.glm <- function(x, exp = TRUE, conf.int = 0.95,
   
   res <- cbind.data.frame(
     coef = exp(co[, 1L]),
+    # na.omit(exp(ci)),
     exp(ci),
     p.value = co[, grep('^Pr', colnames(co))]
   )
@@ -349,6 +350,43 @@ cleanfp.formula <- function(formula = formula(data), data, conf.int = 0.95,
   structure(
     list(cleanfp = res, object = list(formula = formula, data = data),
          model.frame = mf, order = o),
+    class = c('forest', 'cleanfp')
+  )
+}
+
+#' @rdname cleanfp
+#' @export
+cleanfp.lm <- function(x, conf.int = 0.95,
+                        digits = 2L, format_pval = TRUE, ...) {
+  assert_class(x, 'lm')
+  
+  ss <- summary(x)
+  co <- ss$coefficients
+  suppressMessages(
+    ci <- confint(x, level = conf.int)
+  )
+  colnames(ci) <-
+    paste0(c('lower .', 'upper .'), conf.int * 100)
+  
+  res <- cbind.data.frame(
+    coef = co[, 1L],
+    ci,
+    p.value = co[, grep('^Pr', colnames(co))]
+  )
+  
+  res[] <- lapply(res, roundr, digits = digits)
+  
+  pvals <- co[, grep('^Pr', colnames(co))]
+  res <- cbind(res, p.value.numeric = pvals)
+  
+  res$p.value <- if (isTRUE(format_pval))
+    pvalr(pvals)
+  else if (is.function(format_pval))
+    format_pval(pvals)
+  else format.pval(pvals)
+  
+  structure(
+    list(cleanfp = res, object = x, model.frame = model.frame(x)),
     class = c('forest', 'cleanfp')
   )
 }
