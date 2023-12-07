@@ -52,7 +52,7 @@
 #' @param plot logical; if \code{TRUE}, a forest plot is generated; otherwise,
 #'   a list of data to plot is returned (see \code{plot.forest})
 #' @param panel_size proportional size of \code{c(left, middle, right)} panels
-#' @param col.rows optional vector of colors for each row
+#' @param col.rows optional vector of colors for each row background
 #' @param at.text optional x-axis locations for the text columns in normalized
 #'   device coordinates; see \code{\link{grconvertX}}
 #' @param left_panel (dev) a \code{emph} named list of additional text columns
@@ -60,11 +60,14 @@
 #' @param center_panel (dev) optional function used to draw the plot
 #' @param type type of plot for middle panel (currently only \code{"point"}) is
 #'   supported
+#' @param space optional indices to insert blank rows
 #' @param show_percent logical; if \code{TRUE}, percents are shown for each row
 #' @param show_columns logical or a vector of logicals for each text column
 #' @param exclude_rows optional pattern to match row labels where any rows
 #'   matching will be excluded from the plot
 #' @param ref_label label for reference groups; default is \code{"Reference"}
+#' @param col.ref,col.header,col.labels vectors of color(s) for the reference,
+#'   headers, and row labels
 #' @param sig.limit significance limit to highlight plot rows and p-values
 #' @param col.sig a vector of colors for \code{>= sig.limit} and
 #'   \code{< sig.limit}, respectively, recycled as needed
@@ -92,6 +95,7 @@
 #'   place but before exiting the function
 #' @param layout layout of figure, either \code{"split"} where plot splits
 #'   the text columns or \code{"unified"} where the text columns are adjacent
+#' @param order (experimental) manually set order for rows
 #' 
 #' @seealso
 #' \code{\link{summary.forest}}
@@ -132,7 +136,7 @@
 #' 
 #' \dontrun{
 #' ## note that this works but better to use sig.limit/col.sig arguments
-#' ## change the color palette
+#' ## instead to change the color palette
 #' palette(c('grey70', 'green4'))
 #' plot(x, show_conf = TRUE, cex = 3)
 #' 
@@ -334,9 +338,9 @@
 #' @export
 
 forest <- function(x, ..., header = FALSE, total = NULL, exclude_rows = NULL,
-                   plotArgs = list(), plot = TRUE) {
+                   space = NULL, plotArgs = list(), plot = TRUE) {
   x <- cleanfp(x, ...)
-  x <- add_reference(x, header = header, total = total)
+  x <- add_reference(x, header = header, total = total, space = space)
   x <- prepare_forest(x)
   
   if (!is.null(exclude_rows)) {
@@ -389,15 +393,19 @@ order_forest <- function(x, order = NULL) {
 #' @param col.group a vector of colors for each model in \code{x}, recycled
 #'   as needed
 #' @param groups labels for each model in \code{x}
+#' @param FUN (experimental) apply a function to object before plotting
 #' 
 #' @rdname forest
 #' @export
 
 forest2 <- function(x, formula, data, header = FALSE, total = NULL,
-                    exclude_rows = NULL, col.group = c('grey95', 'none'),
+                    exclude_rows = NULL, space = NULL, col.group = c('grey95', 'none'),
                     groups = names(x), panel.last = NULL, FUN = NULL, ...) {
   if (!inherits(x, 'list'))
-    return(forest(x, header = header, total = total, exclude_rows = exclude_rows, ...))
+    return(
+      forest(x, header = header, total = total, space = space,
+                  exclude_rows = exclude_rows, ...)
+    )
   
   lx <- length(x)
   if (!missing(formula))
@@ -419,6 +427,7 @@ forest2 <- function(x, formula, data, header = FALSE, total = NULL,
   prep_lists <- lapply(seq_along(x), function(ii) {
     x <- forest(
       x[[ii]], formula = formula[[ii]], data = data[[ii]], plot = FALSE,
+      space = space,
       header = header[[ii]], total = total[[ii]], exclude_rows = exclude_rows
     )
     structure(x[[1L]], class = 'cleanfp_list')
@@ -452,9 +461,11 @@ forest2 <- function(x, formula, data, header = FALSE, total = NULL,
 plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
                         col.rows = NULL, at.text = NULL,
                         left_panel = NULL, center_panel = NULL, header = FALSE,
-                        type = c('ci', 'box', 'tplot'),
+                        type = c('ci', 'box', 'tplot'), space = NULL,
                         show_percent = TRUE, show_columns = TRUE,
-                        exclude_rows = NULL, ref_label = 'Reference',
+                        exclude_rows = NULL,
+                        ref_label = 'Reference', col.ref = 'darkgrey',
+                        col.header = 'black', col.labels = 'black',
                         sig.limit = 0.05, col.sig = 1:2,
                         names = NULL, col.names = 'black', font.names = 2L,
                         show_conf = FALSE, conf_format = '(%s, %s)', labels = NULL,
@@ -469,7 +480,7 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
   
   if (inherits(x, c('coxph', ''))) {
     x <- cleanfp(x)
-    x <- add_reference(x, header)
+    x <- add_reference(x, header = header, space = space)
     x <- prepare_forest(x)
   }
   
@@ -538,14 +549,21 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
   ## color pvalues < 0.05
   # col <- grepl('\\.0[0-4]', x$`p-value`) + 1L
   ## color pvalues < sig.limit
-  col <- (x$numeric$p.value < sig.limit) + 1L
-  col <- rep_len(col.sig, 2L)[col]
+  col.pvalue <- (x$numeric$p.value < sig.limit) + 1L
+  col.pvalue <- rep_len(col.sig, 2L)[col.pvalue]
   
   col.names <- rep_len(col.names, 4L)
   font.names <- rep_len(font.names, 4L)
   
+  idx.header <- !grepl('^  ', x[[1L]])
+  col.header <- rep_len(col.header, sum(idx.header))
+  col.labels <- rep_len(col.labels, sum(!idx.header))
+  col.text <- rep_len('black', length(idx.header))
+  col.text[idx.header] <- col.header
+  col.text[!idx.header] <- col.labels
+  
   ## identify reference lines
-  which_ref <- grep('Reference', x$Estimate)
+  which_ref <- grep('Reference', rep(x$Estimate, 5L))
   
   ## text columns to show
   show_columns <- rep_len(show_columns, 4L + length(left_panel))
@@ -595,7 +613,7 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
   # plot.null(lp)
   adj <- c(0, rep(0.5, length(lp) - 1L))
   plot_text(
-    lp, 1:2, col = vec('black', 'darkgrey', which_ref, nr),
+    lp, 1:2, col = vec(col.text, col.ref, which_ref, nr, sum(lengths(lp))),
     adj = rep(adj, each = nr), font = 1L, at = at.text[nlp]
   ) -> at
   vtext(
@@ -634,8 +652,8 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
   # plot.null(rp)
   plot_text(
     rp, c(1, 2.5), at = at.text[-(nlp)],
-    col = c(vec('black', 'darkgrey', which_ref, nr),
-            col,
+    col = c(vec(col.labels, col.ref, which_ref, nr, sum(lengths(rp[-(1:2)]))),
+            col.pvalue,
             rep('transparent', length(x$Term))),
     font = rep(1L, length(x$Term)), adj = rep_len(0.5, length(x$Term))
   ) -> at
@@ -673,7 +691,7 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
   plot.window(xlim, range(lx))
   
   if (is.null(center_panel)) {
-    panel_fn(nn, yy, type = 'n', xlim = xlim, logx = logx, col = col, ...)
+    panel_fn(nn, yy, type = 'n', xlim = xlim, logx = logx, col = col.pvalue, ...)
     axis(1L, pos = lims$y[1L])
   } else eval(center_panel)
   
@@ -736,11 +754,13 @@ plot.null <- function(window) {
   invisible(NULL)
 }
 
-vec <- function(default, replacement, idx, n) {
+vec <- function(default, replacement, idx, n, n_max = NULL) {
   # vec(1, 0, 2:3, 5); vec(1:5, 0, 2:3)
   res <- if (missing(n))
     default else rep(default, n)
-  replace(res, idx, replacement)
+  res <- replace(res, idx, replacement)
+  if (!is.null(n_max))
+    rep_len(res, n_max) else res
 }
 
 vtext <- function(...) {

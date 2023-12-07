@@ -12,6 +12,7 @@ forest(
   header = FALSE,
   total = NULL,
   exclude_rows = NULL,
+  space = NULL,
   plotArgs = list(),
   plot = TRUE
 )
@@ -23,6 +24,7 @@ forest2(
   header = FALSE,
   total = NULL,
   exclude_rows = NULL,
+  space = NULL,
   col.group = c("grey95", "none"),
   groups = names(x),
   panel.last = NULL,
@@ -39,10 +41,14 @@ forest2(
   center_panel = NULL,
   header = FALSE,
   type = c("ci", "box", "tplot"),
+  space = NULL,
   show_percent = TRUE,
   show_columns = TRUE,
   exclude_rows = NULL,
   ref_label = "Reference",
+  col.ref = "darkgrey",
+  col.header = "black",
+  col.labels = "black",
   sig.limit = 0.05,
   col.sig = 1:2,
   names = NULL,
@@ -88,6 +94,8 @@ for \code{forest2}, a vector of total observations for each model}
 \item{exclude_rows}{optional pattern to match row labels where any rows
 matching will be excluded from the plot}
 
+\item{space}{optional indices to insert blank rows}
+
 \item{plotArgs}{a named list of additional arguments passed to
 \code{plot.forest}}
 
@@ -106,9 +114,11 @@ as needed}
 \item{panel.last}{an expression to be evaluated after plotting has taken
 place but before exiting the function}
 
+\item{FUN}{(experimental) apply a function to object before plotting}
+
 \item{panel_size}{proportional size of \code{c(left, middle, right)} panels}
 
-\item{col.rows}{optional vector of colors for each row}
+\item{col.rows}{optional vector of colors for each row background}
 
 \item{at.text}{optional x-axis locations for the text columns in normalized
 device coordinates; see \code{\link{grconvertX}}}
@@ -126,6 +136,9 @@ supported}
 \item{show_columns}{logical or a vector of logicals for each text column}
 
 \item{ref_label}{label for reference groups; default is \code{"Reference"}}
+
+\item{col.ref, col.header, col.labels}{vectors of color(s) for the reference,
+headers, and row labels}
 
 \item{sig.limit}{significance limit to highlight plot rows and p-values}
 
@@ -165,6 +178,8 @@ has been set up but before any plotting takes place}
 
 \item{layout}{layout of figure, either \code{"split"} where plot splits
 the text columns or \code{"unified"} where the text columns are adjacent}
+
+\item{order}{(experimental) manually set order for rows}
 }
 \description{
 A forest plot.
@@ -221,7 +236,7 @@ plot(x, show_conf = TRUE)
 
 \dontrun{
 ## note that this works but better to use sig.limit/col.sig arguments
-## change the color palette
+## instead to change the color palette
 palette(c('grey70', 'green4'))
 plot(x, show_conf = TRUE, cex = 3)
 
