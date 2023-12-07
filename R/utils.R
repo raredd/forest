@@ -1,10 +1,40 @@
 ### forest plot utils
 # add_reference, get_n, merge_forest, prepare_forest
 # 
+# unexported:
+# get_n, insert, locf
+# 
 # S3 methods: print, summary
 # print.forest, summary.forest
 ###
 
+
+get_n <- function(x, percent = FALSE, total = NULL) {
+  n <- if (is.numeric(x))
+    length(sort(x)) else table(x)
+  
+  total <- if (is.null(total))
+    length(x) else total
+  if (percent)
+    n / total else n
+}
+
+insert <- function(x, where = NULL, what = NA) {
+  if (is.null(where))
+    return(x)
+  if (max(where <- sort(where)) > length(x))
+    x <- c(x, rep(NA, max(where) - length(x) - 1L))
+  c(x, what)[order(c(seq_along(x), where - 0.5))]
+}
+
+locf <- function(x, fromLast = FALSE) {
+  # locf(c(1, NA, 2)); locf(c(1, NA, 2), TRUE); locf(c(NA, NA, 2)); locf(c(NA, NA, 2), TRUE)
+  if (fromLast)
+    return(rev(Recall(rev(x), FALSE)))
+  for (ii in seq_along(x))
+    x[ii][is.na(x[ii])] <- if (ii == 1L) NA else x[ii - 1L]
+  x
+}
 
 #' Forest utilities
 #' 
@@ -15,6 +45,7 @@
 #'   the model
 #' @param total optional total sample size, useful if model excludes
 #'   observations with missing data
+#' @param space optional indices to insert blank rows
 #' @param keep_strata,keep_cluster logical; if \code{FALSE} (default), strata
 #'   and/or cluster variables, e.g., \code{y ~ strata(a) + cluster(b)} will be
 #'   omitted from row output
@@ -23,7 +54,7 @@
 
 #' @rdname forest_utils
 #' @export
-add_reference <- function(x, header = FALSE, total = NULL,
+add_reference <- function(x, header = FALSE, total = NULL, space = NULL,
                           keep_strata = FALSE, keep_cluster = FALSE) {
   assert_class(x, 'cleanfp')
   mf   <- x$model.frame %||% model.frame(x[[2L]])
@@ -79,6 +110,9 @@ add_reference <- function(x, header = FALSE, total = NULL,
     # dd[, 1L] <- unlist(rn)
   }
   
+  dd <- data.frame(lapply(dd, function(x) insert(x, space)))
+  dd$group <- locf(c(1L, dd$group))[-1L]
+  
   ## extra data with numeric values
   dd_n <- dd[, c(2:4, 6)]
   suppressWarnings({
@@ -87,8 +121,8 @@ add_reference <- function(x, header = FALSE, total = NULL,
     # dd_n[] <- lapply(dd_n, function(x) as.numeric(gsub('[< ]', '', x)))
   })
   
-  dd$N <- unlist(nums[-1L])
-  dd$P <- unlist(pcts[-1L])
+  dd$N <- insert(unlist(nums[-1L]), space)
+  dd$P <- insert(unlist(pcts[-1L]), space)
   
   rownames(dd) <- rownames(dd_n) <- NULL
   
@@ -96,16 +130,6 @@ add_reference <- function(x, header = FALSE, total = NULL,
     list(dd, dd_n, object = x$object),
     class = c('forest', 'cleanfp_ref')
   )
-}
-
-get_n <- function(x, percent = FALSE, total = NULL) {
-  n <- if (is.numeric(x))
-    length(sort(x)) else table(x)
-  
-  total <- if (is.null(total))
-    length(x) else total
-  if (percent)
-    n / total else n
 }
 
 #' @rdname forest_utils

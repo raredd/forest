@@ -11,6 +11,7 @@ add_reference(
   x,
   header = FALSE,
   total = NULL,
+  space = NULL,
   keep_strata = FALSE,
   keep_cluster = FALSE
 )
@@ -27,6 +28,8 @@ the model}
 
 \item{total}{optional total sample size, useful if model excludes
 observations with missing data}
+
+\item{space}{optional indices to insert blank rows}
 
 \item{keep_strata, keep_cluster}{logical; if \code{FALSE} (default), strata
 and/or cluster variables, e.g., \code{y ~ strata(a) + cluster(b)} will be
