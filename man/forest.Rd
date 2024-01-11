@@ -223,7 +223,6 @@ plot(x, show_conf = TRUE)
 plot(x, sig.limit = 0.2, col.sig = c('darkgrey', 'red3'))
 plot(x, col.sig = 'black')
 
-
 ## change the p-value format
 x <- forest(cx, plot = FALSE, format_pval = format.pval)
 plot(x, show_conf = TRUE)
@@ -252,8 +251,26 @@ plot(x, labels = function(x) gsub('^(sex|I)|[()]|(TRUE|FALSE)', '', x))
 plot(x)
 
 
-## exclude rows without affecting the model -- !! experimental !!
+## experimental options
+\dontrun{
+## exclude rows without affecting the model
 plot(x, exclude_rows = 'ecog2')
+
+## change the order of rows
+plot(x, order = c(1:3, 5, 4, 6))
+
+## use diamonds instead of pch
+## - width of diamond is the confidence interval
+plot(x, cex = 1, diamond = 5:6) ## manual
+plot(x, cex = 1, diamond = function(x) grepl('ecog', x$Term)) ## programmatic
+
+## add spacing between rows
+## - this must be done during the "add_reference" step
+forest(cx, space = c(2, 4, 7, 9, 11, 13, 15))
+forest(cx, space = function(x) {
+  print(names(x)); print(x[, 7]); c(which(!duplicated(x[, 7]))[-1], nrow(x) + 1)
+})
+}
 
 ## a useful case for exclude_rows
 ## note that this no longer applies -- cluster/strata are already excluded
