@@ -10,6 +10,8 @@ panel_ci(
   col = 1L,
   cex = NULL,
   pch = NULL,
+  diamond = NULL,
+  cex.diamond = 5,
   xlim = extendrange(unlist(data)),
   limits = xlim,
   logx = FALSE,
@@ -57,6 +59,7 @@ dd <- data.frame(
 )
 
 panel_ci(dd[1:10, ])
+panel_ci(dd[1:10, ], diamond = c(1, 5, 10))
 panel_ci(dd[1:10, ], limits = c(0.25, 1.5))
 panel_ci(dd[1:10, ], limits = c(0.25, 0.95))
 

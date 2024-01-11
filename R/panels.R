@@ -94,6 +94,7 @@ panel_box <- function(data, y = seq.int(length(data)),
 #' )
 #' 
 #' panel_ci(dd[1:10, ])
+#' panel_ci(dd[1:10, ], diamond = c(1, 5, 10))
 #' panel_ci(dd[1:10, ], limits = c(0.25, 1.5))
 #' panel_ci(dd[1:10, ], limits = c(0.25, 0.95))
 #' 
@@ -101,11 +102,31 @@ panel_box <- function(data, y = seq.int(length(data)),
 
 panel_ci <- function(data, y = rev(seq.int(nrow(data))),
                      col = 1L, cex = NULL, pch = NULL,
+                     diamond = NULL, cex.diamond = 5,
                      xlim = extendrange(unlist(data)), limits = xlim,
                      logx = FALSE, panel.first = NULL, panel.last = NULL,
                      vline = 1, type, ...) {
-  col <- rep_len(col, nrow(data))
   # type <- match.arg(type)
+  col <- pcol <- rep_len(col, nrow(data))
+  
+  cex <- if (!is.null(cex))
+    rep_len(cex, nrow(data))
+  else rescaler(
+    ifelse(abs(data[, 1L]) < 1, 1 / abs(data[, 1L]), abs(data[, 1L])),
+    c(1, 5)
+    # c(.5, 2),
+    # c(0, max(xx_num, na.rm = TRUE)))
+    # c(.5, 5)
+  )
+  
+  dia <- rep_len(FALSE, length(y))
+  if (is.function(diamond))
+    diamond <- diamond(data)
+  
+  if (!is.null(diamond)) {
+    pcol[diamond] <- NA
+    dia[diamond] <- TRUE
+  }
   
   plot(data[, 1L], y, ann = FALSE, axes = FALSE, type = 'n', xlim = xlim,
        log = ifelse(logx, 'x', ''), ...,
@@ -117,16 +138,7 @@ panel_ci <- function(data, y = rev(seq.int(nrow(data))),
          if (TRUE || type) { ## type
            data[, 1L][!data[, 1L] %inside% xlim |
                         !data[, 1L] %inside% limits] <- NA
-           points(data[, 1L], y, pch = pch %||% 15L, col = col,
-                  cex = cex %||% rescaler(
-                    ifelse(abs(data[, 1L]) < 1,
-                           1 / abs(data[, 1L]), abs(data[, 1L])),
-                    c(1, 5)
-                    # c(.5, 2),
-                    # c(0, max(xx_num, na.rm = TRUE)))
-                    # c(.5, 5)
-                  )
-           )
+           points(data[, 1L], y, pch = pch %||% 15L, col = pcol, cex = cex)
            # segments(data[, 2L], y, data[, 3L], yy, col = col)
            
            lo <- data[, 2L]
@@ -142,6 +154,11 @@ panel_ci <- function(data, y = rev(seq.int(nrow(data))),
            
            varrows <- Vectorize(arrows, c('code', 'angle'))
            for (ii in seq_along(y)) {
+             if (dia[ii]) {
+               h <- par('cxy')[2L] / cex.diamond * cex[ii]
+               diamond(y[ii], data[ii, 1L], lo[ii], hi[ii], h, col[ii])
+               next
+             }
              ## zero-length warning
              len <- grconvertX(hi[ii], 'user', 'in') -
                grconvertX(lo[ii], 'user', 'in')

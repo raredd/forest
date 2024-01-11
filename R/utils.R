@@ -2,12 +2,20 @@
 # add_reference, get_n, merge_forest, prepare_forest
 # 
 # unexported:
-# get_n, insert, locf
+# diamond, get_n, insert, locf
 # 
 # S3 methods: print, summary
 # print.forest, summary.forest
 ###
 
+
+diamond <- function(y, x, lower, upper, height, col = 'black', ...) {
+  # plot(1); diamond(1, 1.2, 1.1, 1.4, 0.1)
+  xx <- c(lower, x, upper, x, lower)
+  yy <- c(y, y - height / 2, y, y + height / 2, y)
+  polygon(xx, yy, border = NA, col = col)
+  invisible(list(x = xx, y = yy))
+}
 
 get_n <- function(x, percent = FALSE, total = NULL) {
   n <- if (is.numeric(x))
@@ -109,6 +117,10 @@ add_reference <- function(x, header = FALSE, total = NULL, space = NULL,
     dd[, 1L] <- unique(unlist(rn))
     # dd[, 1L] <- unlist(rn)
   }
+  
+  # Row.names exp.coef. lower..95 upper..95 p.value p.value.numeric group
+  if (is.function(space))
+    space <- space(dd)
   
   dd <- data.frame(lapply(dd, function(x) insert(x, space)))
   dd$group <- locf(c(1L, dd$group))[-1L]
