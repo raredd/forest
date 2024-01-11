@@ -8,7 +8,22 @@
 \usage{
 as.forest(x, ...)
 
-\method{as.forest}{default}(x, lower, upper, p.value, labels, N, P, digits = 2L, ...)
+\method{as.forest}{default}(
+  x,
+  lower,
+  upper,
+  p.value,
+  labels,
+  N,
+  P,
+  digits = 2L,
+  text.estimate = NULL,
+  text.pvalue = NULL,
+  text.x = NULL,
+  text.low = NULL,
+  text.high = NULL,
+  ...
+)
 
 \method{as.forest}{data.frame}(x, labels = NULL, N = NULL, P = NULL, ...)
 }
@@ -38,6 +53,14 @@ x <- as.forest(
 x
 plot(x)
 
+## flag reference rows
+x <- as.forest(
+  x = 1:5, lower = 1:5 - 0.5, upper = 1:5 + 0.5, p.value = runif(5),
+  text.estimate = replace(1:5, 4, 'Reference'),
+  labels = paste('var', 1:5), N = 1:5 * 10, P = 1:5 / 10
+)
+x
+plot(x)
 
 ## with headers
 x <- c(NA, 1, 2, NA, 1, 2, 3)

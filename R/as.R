@@ -23,6 +23,14 @@
 #' x
 #' plot(x)
 #' 
+#' ## flag reference rows
+#' x <- as.forest(
+#'   x = 1:5, lower = 1:5 - 0.5, upper = 1:5 + 0.5, p.value = runif(5),
+#'   text.estimate = replace(1:5, 4, 'Reference'),
+#'   labels = paste('var', 1:5), N = 1:5 * 10, P = 1:5 / 10
+#' )
+#' x
+#' plot(x)
 #' 
 #' ## with headers
 #' x <- c(NA, 1, 2, NA, 1, 2, 3)
@@ -55,8 +63,9 @@ as.forest <- function(x, ...) {
 
 #' @rdname as.forest
 #' @export
-as.forest.default <- function(x, lower, upper, p.value, labels, N, P,
-                              digits = 2L, ...) {
+as.forest.default <- function(x, lower, upper, p.value, labels, N, P, digits = 2L,
+                              text.estimate = NULL, text.pvalue = NULL,
+                              text.x = NULL, text.low = NULL, text.high = NULL, ...) {
   n <- length(x)
   
   stopifnot(
@@ -72,12 +81,12 @@ as.forest.default <- function(x, lower, upper, p.value, labels, N, P,
     Term = labels,
     N = N,
     P = P,
-    'p-value' = pvalr(p.value),
-    Estimate  = roundr(x, digits),
+    'p-value' = text.pvalue %||% pvalr(p.value),
+    Estimate  = text.estimate %||% roundr(x, digits),
     text = list(
-      x    = roundr(x, digits),
-      low  = roundr(lower, digits),
-      high = roundr(upper, digits)
+      x    = text.x    %||% roundr(x, digits),
+      low  = text.low  %||% roundr(lower, digits),
+      high = text.high %||% roundr(upper, digits)
     ),
     numeric = data.frame(x, lower, upper, p.value)
   )
