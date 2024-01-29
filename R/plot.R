@@ -470,7 +470,7 @@ forest2 <- function(x, formula, data, header = FALSE, total = NULL,
     }
   )
   
-  invisible(x)
+  invisible(xx)
 }
 
 #' @rdname forest
