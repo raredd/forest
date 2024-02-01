@@ -674,7 +674,7 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
   plot_text(
     rp, c(1, 2.5), at = at.text[-(nlp)],
     col = c(vec(col.labels, col.ref, which_ref, nr, sum(lengths(rp[-(1:2)]))),
-            col.pvalue,
+            replace(col.pvalue, ri, col.ref),
             rep('transparent', length(x$Term))),
     font = rep(1L, length(x$Term)), adj = rep_len(0.5, length(x$Term))
   ) -> at
