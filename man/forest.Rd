@@ -46,6 +46,7 @@ forest2(
   show_columns = TRUE,
   exclude_rows = NULL,
   ref_label = "Reference",
+  ref_label_pvalue = "",
   col.ref = "darkgrey",
   col.header = "black",
   col.labels = "black",
@@ -136,6 +137,9 @@ supported}
 \item{show_columns}{logical or a vector of logicals for each text column}
 
 \item{ref_label}{label for reference groups; default is \code{"Reference"}}
+
+\item{ref_label_pvalue}{label for p-value for reference groups; default is
+\code{""}}
 
 \item{col.ref, col.header, col.labels}{vectors of color(s) for the reference,
 headers, and row labels}

@@ -66,6 +66,8 @@
 #' @param exclude_rows optional pattern to match row labels where any rows
 #'   matching will be excluded from the plot
 #' @param ref_label label for reference groups; default is \code{"Reference"}
+#' @param ref_label_pvalue label for p-value for reference groups; default is
+#'   \code{""}
 #' @param col.ref,col.header,col.labels vectors of color(s) for the reference,
 #'   headers, and row labels
 #' @param sig.limit significance limit to highlight plot rows and p-values
@@ -481,8 +483,8 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
                         type = c('ci', 'box', 'tplot'), space = NULL,
                         show_percent = TRUE, show_columns = TRUE,
                         exclude_rows = NULL,
-                        ref_label = 'Reference', col.ref = 'darkgrey',
-                        col.header = 'black', col.labels = 'black',
+                        ref_label = 'Reference', ref_label_pvalue = '',
+                        col.ref = 'darkgrey', col.header = 'black', col.labels = 'black',
                         sig.limit = 0.05, col.sig = 1:2,
                         names = NULL, col.names = 'black', font.names = 2L,
                         show_conf = FALSE, conf_format = '(%s, %s)', labels = NULL,
@@ -652,6 +654,7 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
   np <- seq_along(rp)
   cf <- paste('%s', conf_format[1L])
   ri <- grepl('Reference', rp[[1L]])
+  rp[[2L]][ri] <- rp[[3L]][ri] <- ref_label_pvalue
   if (show_conf) {
     rp$Estimate <- ifelse(
       ri, replace(rp[[1L]], ri, ref_label),
