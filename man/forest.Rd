@@ -40,6 +40,8 @@ forest2(
   left_panel = NULL,
   center_panel = NULL,
   header = FALSE,
+  font.header = 1L,
+  font.labels = 1L,
   type = c("ci", "box", "tplot"),
   space = NULL,
   show_percent = TRUE,
@@ -128,6 +130,8 @@ device coordinates; see \code{\link{grconvertX}}}
 added to the left panel}
 
 \item{center_panel}{(dev) optional function used to draw the plot}
+
+\item{font.header, font.labels}{font style for headers and labels}
 
 \item{type}{type of plot for middle panel (currently only \code{"point"}) is
 supported}

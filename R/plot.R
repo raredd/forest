@@ -41,6 +41,7 @@
 #'   each variable in the model
 #'   
 #'   for \code{forest2}, a list of header vectors for each model
+#' @param font.header,font.labels font style for headers and labels
 #' @param total optional argument to give total number of observations, useful
 #'   for models which have already removed missing observations; by default,
 #'   the percentages will be relative to fitted models rather than total
@@ -479,7 +480,8 @@ forest2 <- function(x, formula, data, header = FALSE, total = NULL,
 #' @export
 plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
                         col.rows = NULL, at.text = NULL,
-                        left_panel = NULL, center_panel = NULL, header = FALSE,
+                        left_panel = NULL, center_panel = NULL,
+                        header = FALSE, font.header = 1L, font.labels = 1L,
                         type = c('ci', 'box', 'tplot'), space = NULL,
                         show_percent = TRUE, show_columns = TRUE,
                         exclude_rows = NULL,
@@ -632,9 +634,11 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
   else par(fig = c(0, xcf[1L] * 0.9, 0, 1))
   # plot.null(lp)
   adj <- c(0, rep(0.5, length(lp) - 1L))
+  font <- rep_len(font.labels, length(lp$Term))
+  font[!grepl('^\\s', lp$Term)] <- font.header
   plot_text(
     lp, 1:2, col = vec(col.text, col.ref, which_ref, nr, sum(lengths(lp))),
-    adj = rep(adj, each = nr), font = 1L, at = at.text[nlp]
+    adj = rep(adj, each = nr), font = font, at = at.text[nlp]
   ) -> at
   vtext(
     at$x[nlp], max(at$y) + rep_len(1L, length(lp)),
