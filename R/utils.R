@@ -100,7 +100,8 @@ add_reference <- function(x, header = FALSE, total = NULL, space = NULL,
   if (identical(header, FALSE))
     dd[, 1L] <- paste0('  ', rn)
   
-  dd[, 2L][is.na(dd[, 2L])] <- 'Reference'
+  ref <- is.na(dd[, 2L]) & !trimws(dd[, 1L]) %in% rownames(x[[1L]])
+  dd[, 2L][ref] <- 'Reference'
   dd[, ncol(dd)][is.na(dd[, ncol(dd)])] <- '-'
   
   if (!identical(header, FALSE)) {
