@@ -717,7 +717,8 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
   
   if (is.null(center_panel)) {
     panel_fn(nn, yy, type = 'n', xlim = xlim, logx = logx, col = col.pvalue, ...)
-    axis(1L, pos = lims$y[1L])
+    if (axes)
+      axis(1L, pos = lims$y[1L])
   } else eval(center_panel)
   
   panel.last
