@@ -603,8 +603,6 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
   plot.window(1:2, range(lx, finite = TRUE))
   # plot.null()
   
-  panel.first
-  
   ## base plot
   # plot.null(lx)
   col.rows <- if (is.null(col.rows)) {
@@ -716,12 +714,12 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
   plot.window(xlim, range(lx))
   
   if (is.null(center_panel)) {
-    panel_fn(nn, yy, type = 'n', xlim = xlim, logx = logx, col = col.pvalue, ...)
+    panel_fn(nn, yy, type = 'n', xlim = xlim, logx = logx, col = col.pvalue,
+             panel.first = panel.first, panel.last = panel.last, ...)
     if (axes)
       axis(1L, pos = lims$y[1L])
   } else eval(center_panel)
   
-  panel.last
   
   invisible(op)
 }
