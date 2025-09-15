@@ -40,5 +40,4 @@
 #' 
 #' @import graphics grDevices stats utils
 #' @name forest-package
-#' @docType package
-NULL
+"_PACKAGE"

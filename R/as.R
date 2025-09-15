@@ -10,6 +10,8 @@
 #' @param x the model estimates
 #' @param lower,upper the lower and upper confidence intervals for \code{x}
 #' @param p.value p-values for each estimate
+#' @param text.estimate,text.pvalue,text.x,text.low,text.high optional arguments
+#'   to override the text output formatted from \code{x}
 #' @param labels the row labels for each \code{x}
 #' @param N,P sample size and percentages for each \code{x}
 #' @param digits the number of digits past the decimal point to keep
