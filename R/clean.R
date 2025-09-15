@@ -242,9 +242,9 @@ cleanfp.glm <- function(x, exp = TRUE, conf.int = 0.95,
   
   ss <- summary(x)
   co <- ss$coefficients
-  suppressMessages(
-    ci <- confint(x, level = conf.int)
-  )
+  ci <- tryCatch({
+    suppressMessages(confint(x, level = conf.int))
+  }, error = function(e) matrix(NA, nrow(co), 2L))
   colnames(ci) <-
     paste0(c('lower .', 'upper .'), conf.int * 100)
   
@@ -362,9 +362,9 @@ cleanfp.lm <- function(x, conf.int = 0.95,
   
   ss <- summary(x)
   co <- ss$coefficients
-  suppressMessages(
-    ci <- confint(x, level = conf.int)
-  )
+  ci <- tryCatch({
+    suppressMessages(confint(x, level = conf.int))
+  }, error = function(e) matrix(NA, nrow(co), 2L))
   colnames(ci) <-
     paste0(c('lower .', 'upper .'), conf.int * 100)
   
