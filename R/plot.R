@@ -4,7 +4,7 @@
 # S3 methods: plot
 # plot.forest
 # 
-# unexported: bars, plot_text, plot.null, vec, vtext
+# unexported: bars, plot_text, null_plot, vec, vtext
 ###
 
 
@@ -59,8 +59,10 @@
 #' @param left_panel (dev) a \code{emph} named list of additional text columns
 #'   added to the left panel
 #' @param center_panel (dev) optional function used to draw the plot
-#' @param type type of plot for middle panel (currently only \code{"point"}) is
-#'   supported
+#' @param type type of plot for middle panel; one of \code{"ci"}, \code{"box"},
+#'   or \code{"tplot"} for point/confidence intervals, box plots or
+#'   \code{\link[rawr]{tplot}}, respectively; alternatively, a function to
+#'   create custom panels; see examples
 #' @param space optional indices to insert blank rows
 #' @param show_percent logical; if \code{TRUE}, percents are shown for each row
 #' @param show_columns logical or a vector of logicals for each text column
@@ -72,8 +74,10 @@
 #' @param col.ref,col.header,col.labels vectors of color(s) for the reference,
 #'   headers, and row labels
 #' @param sig.limit significance limit to highlight plot rows and p-values
-#' @param col.sig a vector of colors for \code{>= sig.limit} and
-#'   \code{< sig.limit}, respectively, recycled as needed
+#' @param col.sig,font.sig a vector of length 2 of colors/fonts for
+#'   \code{>= sig.limit} and \code{< sig.limit}, respectively
+#' @param sig_columns column indices (\code{1:4}) where \code{*.sig} formatting
+#'   is applied (currently only \code{font.sig})
 #' @param names optional vector of length 4 giving the labels for each column
 #' @param col.names,font.names color and font vectors for \code{names},
 #'   recycled as needed
@@ -104,7 +108,18 @@
 #' \code{\link{summary.forest}}
 #' 
 #' @examples
+#' forest(lm(mpg ~ ., mtcars))
 #' forest(lm(mpg ~ ., mtcars), plotArgs = list(xlim = c(-5, 5), vline = 0))
+#' 
+#' ## custom panel - note rows are reversed
+#' panel <- function(data, ...) {
+#'   data <- data[rev(seq.int(nrow(data))), ]
+#'   for (ii in seq.int(nrow(data))) {
+#'     segments(data[ii, 2], ii, data[ii, 3], col = ii, lty = 'dashed')
+#'     points(data[ii, 1], ii, pch = 16, col = ii)
+#'   }
+#' }
+#' forest(lm(mpg ~ ., mtcars), plotArgs = list(type = panel, xlim = c(-5, 5)))
 #' 
 #' library('survival')
 #' lung2 <- within(lung, {
@@ -124,14 +139,14 @@
 #' 
 #' ## highlighting rows/p-values
 #' plot(x, sig.limit = 0.2, col.sig = c('darkgrey', 'red3'))
-#' plot(x, col.sig = 'black')
+#' plot(x, col.sig = 'black', font.sig = c(1, 2), sig_columns = 3:4)
 #' 
 #' ## change the p-value format
 #' x <- forest(cx, plot = FALSE, format_pval = format.pval)
 #' plot(x, show_conf = TRUE)
 #' 
 #' x <- forest(cx, plot = FALSE,
-#'   format_pval = function(x) forest:::pvalr(x, digits = 3)
+#'   format_pval = function(x) forest:::pvalr(x, digits = 3, sig.limit = 0.05)
 #' )
 #' plot(x, show_conf = TRUE)
 #' 
@@ -187,20 +202,20 @@
 #' ## add extra columns to left panel
 #' plot(
 #'   x, show_conf = TRUE, panel_size = c(1.5, 1.5, 1), layout = 'unified',
-#'   left_panel = list(HR = x$cleanfp_list$numeric$`exp(coef)`)
+#'   left_panel = list(HR = x$cleanfp_list$numeric$exp)
 #' )
 #' 
 #' plot(
 #'   x, show_conf = TRUE, panel_size = c(2, 1.5, 1), layout = 'unified',
 #'   left_panel = list(
-#'     HR = x$cleanfp_list$numeric$`exp(coef)`,
+#'     HR = x$cleanfp_list$numeric$exp,
 #'     ' ' = ifelse(x$cleanfp_list$numeric$p.value < 0.05, '*', '')
 #'   )
 #' )
 #' 
 #' 
 #' ## use a custom denominator for percents, eg, if the model sample size
-#' ## excludes NAs or missing data
+#' ## excludes NAs or has missing data
 #' x <- coxph(Surv(time, status) ~ age2 + sex + ph.ecog, lung2)
 #' forest(x, total = nrow(lung2))
 #' ## compare
@@ -486,9 +501,10 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
                         show_percent = TRUE, show_columns = TRUE,
                         exclude_rows = NULL,
                         ref_label = 'Reference', ref_label_pvalue = '',
-                        col.ref = 'darkgrey', col.header = 'black', col.labels = 'black',
+                        col.ref = 8L, col.header = 1L, col.labels = 1L,
                         sig.limit = 0.05, col.sig = 1:2,
-                        names = NULL, col.names = 'black', font.names = 2L,
+                        font.sig = c(1L, 1L), sig_columns = 4L,
+                        names = NULL, col.names = 1L, font.names = 2L,
                         show_conf = FALSE, conf_format = '(%s, %s)', labels = NULL,
                         xlim = NULL, axes = TRUE, logx = FALSE,
                         inner.mar = c(0, 0, 0, 0), reset_par = TRUE,
@@ -559,20 +575,27 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
     x[[1L]][ii] <- paste0(strrep(' ', 2L), labfun(lb))
   }
   
-  type <- match.arg(type)
-  panel_fn <- switch(
-    type,
-    ci    = panel_ci,
-    box   = panel_box,
-    tplot = panel_tplot
-  )
+  panel_fn <- if (is.character(type)) {
+    switch(
+      match.arg(type),
+      ci    = panel_ci,
+      box   = panel_box,
+      tplot = panel_tplot,
+      {warning('panel type not available - defaulting to panel_ci'); panel_ci}
+    )
+  } else {
+    match.fun(type)
+  }
   conf.int <- gsub('\\.(\\d+)|.', '\\1', names(nn)[3L])
   
   ## color pvalues < 0.05
   # col <- grepl('\\.0[0-4]', x$`p-value`) + 1L
   ## color pvalues < sig.limit
-  col.pvalue <- (x$numeric$p.value < sig.limit) + 1L
-  col.pvalue <- rep_len(col.sig, 2L)[col.pvalue]
+  idx.sig <- x$numeric$p.value < sig.limit
+  idx.sig[is.na(idx.sig)] <- FALSE
+  col.pvalue <- rep_len(col.sig, 2L)[idx.sig + 1L]
+  font.sig <- rep_len(font.sig, 2L)[idx.sig + 1L]
+  sig_columns <- sig_columns[sig_columns <= (4 + length(left_panel))]
   
   col.names <- rep_len(col.names, 4L)
   font.names <- rep_len(font.names, 4L)
@@ -601,10 +624,10 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
   plot.new()
   # par(...)
   plot.window(1:2, range(lx, finite = TRUE))
-  # plot.null()
+  # null_plot()
   
   ## base plot
-  # plot.null(lx)
+  # null_plot(lx)
   col.rows <- if (is.null(col.rows)) {
     grp <- as.integer(ox$cleanfp_ref[[1L]]$group)
     rep(c(grey(0.95), NA), length(grp))[grp]
@@ -630,14 +653,24 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
   if (layout == 'split')
     par(fig = c(0, xcf[1L], 0, 1))
   else par(fig = c(0, xcf[1L] * 0.9, 0, 1))
-  # plot.null(lp)
+  
   adj <- c(0, rep(0.5, length(lp) - 1L))
   font <- rep_len(font.labels, length(lp$Term))
-  font[!grepl('^\\s', lp$Term)] <- font.header
+  fidx <- !grepl('^\\s', lp$Term)
+  font[fidx] <- rep_len(font.header, length(lp$Term))[fidx]
+  
+  if (any(idx <- 1:2 %in% sig_columns)) {
+    font <- data.frame(font, font)
+    font[, idx] <- font.sig
+    font <- unlist(font)
+  }
+  
+  ## row labels for terms/N - excluding headers
   plot_text(
-    lp, 1:2, col = vec(col.text, col.ref, which_ref, nr, sum(lengths(lp))),
+    lp, seq_along(lp), col = vec(col.text, col.ref, which_ref, nr, sum(lengths(lp))),
     adj = rep(adj, each = nr), font = font, at = at.text[nlp]
   ) -> at
+  ## labels for terms/N
   vtext(
     at$x[nlp], max(at$y) + rep_len(1L, length(lp)),
     col = rep_len(
@@ -672,14 +705,27 @@ plot.forest <- function(x, panel_size = c(1, 1.5, 0.8),
     par(fig = c(tail(xcf, -1L), 1, 0, 1))
   else par(fig = c(xcf[1L] * 1.1, xcf[1L] * 1.75, 0, 1))
   
-  # plot.null(rp)
+  font <- rep_len(font.labels, length(rp[[1L]]))
+  fidx <- !grepl('^\\s', x$Term)
+  # font[fidx] <- rep_len(font.header, length(x$Term))[fidx]
+  if (any(idx <- 3:4 %in% sig_columns)) {
+    font <- data.frame(font, font, font)
+    font[, idx] <- font.sig
+    font <- unlist(font)
+  } else {
+    # font <- c(font, rep(font.sig, 2L))
+  }
+  
+  ## labels for estimate/pvalue
   plot_text(
     rp, c(1, 2.5), at = at.text[-(nlp)],
     col = c(vec(col.labels, col.ref, which_ref, nr, sum(lengths(rp[-(1:2)]))),
             replace(col.pvalue, ri, col.ref),
             rep('transparent', length(x$Term))),
-    font = rep(1L, length(x$Term)), adj = rep_len(0.5, length(x$Term))
+    # font = rep_len(font.labels, length(x$Term)),
+    font = font, adj = rep_len(0.5, length(x$Term) * 3)
   ) -> at
+  ## labels for estimate/pvalue
   vtext(
     unique(at$x)[1:3], max(at$y) + c(1, 1, 1),
     names[c(1:2, 2) + length(lp)] %||% names(rp),
@@ -769,7 +815,7 @@ plot_text <- function(x, width = range(seq_along(x)), at = NULL, ...) {
   invisible(list(x = sx, y = rev(seq.int(lx))))
 }
 
-plot.null <- function(window) {
+null_plot <- function(window) {
   op <- par(mar = c(0, 0, 0, 0))
   on.exit(par(op))
   try(plot.new())
