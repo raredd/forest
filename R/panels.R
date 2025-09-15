@@ -73,6 +73,9 @@ panel_box <- function(data, y = seq.int(length(data)),
 #' @param y y-coordinates where each row of \code{data} is plotted
 #' @param col,cex,pch color, size, plotting character for each, recycled as
 #'   needed
+#' @param diamond,cex.diamond logical or indices of rows to use diamonds instead
+#'   of \code{pch}; the widths are controlled by the confidence intervals, and
+#'   heights are controlled by \code{cex.diamond}
 #' @param xlim x-axis limits
 #' @param limits limits for intervals; values outside of \code{limits}
 #'   will be truncated and drawn as an arrow
@@ -111,13 +114,16 @@ panel_ci <- function(data, y = rev(seq.int(nrow(data))),
   
   cex <- if (!is.null(cex))
     rep_len(cex, nrow(data))
-  else rescaler(
-    ifelse(abs(data[, 1L]) < 1, 1 / abs(data[, 1L]), abs(data[, 1L])),
-    c(1, 5)
-    # c(.5, 2),
-    # c(0, max(xx_num, na.rm = TRUE)))
-    # c(.5, 5)
-  )
+  else {
+    ok <- any(unlist(data[, 1:3]) < 0, na.rm = TRUE)
+    rescaler(
+      if (ok)
+        abs(data[, 1L])
+      else ifelse(abs(data[, 1L]) < 1, 1 / abs(data[, 1L]), abs(data[, 1L])),
+      c(1, 5)
+      # c(0, max(xx_num, na.rm = TRUE))
+    )
+  }
   
   dia <- rep_len(FALSE, length(y))
   if (is.function(diamond))
@@ -201,6 +207,7 @@ panel_ci <- function(data, y = rev(seq.int(nrow(data))),
 #' \code{\link[rawr]{tplot}}
 #' 
 #' @examples
+#' \dontrun{
 #' library('rawr')
 #' set.seed(1)
 #' l <- replicate(5, rnorm(10), simplify = FALSE)
@@ -214,6 +221,7 @@ panel_ci <- function(data, y = rev(seq.int(nrow(data))),
 #'   },
 #'   panel.last = abline(v = 0, lwd = 2, col = 'red')
 #' )
+#' }
 #' 
 #' @export
 
